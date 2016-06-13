@@ -3,8 +3,6 @@
 
 import "package:sqltree/sqltree.dart";
 
-final SqlFormatRule _emptyRule = new SqlFormatRule();
-
 final ExtTypes types = new ExtTypes();
 
 class ExtTypes {
@@ -25,21 +23,17 @@ class ExtTypes {
 
 void _initialize(ExtTypes types) {
   _registerFormatters(types);
-
-  _registerFormatRuleProviders(types);
 }
 
 void _registerFormatters(ExtTypes types) {
-  registerNodeFormatter(new SqlNodeFormatterFunctionWrapper((node) {
+  registerNodeFormatter((node, formattedChildren) {
     if (node is SqlTable) {
       return node.name;
     } else if (node is SqlColumn) {
       return node.parameterName;
     }
-  }));
+  });
 }
-
-void _registerFormatRuleProviders(ExtTypes types) {}
 
 abstract class SqlTable implements SqlNode {
   String get name;
