@@ -4,6 +4,8 @@
 import "package:sqltree/sqltree.dart" as sql;
 import "sqltree_schema.dart";
 
+registerTable(SqlTable table) => sql.registerNode(table);
+
 class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
     implements SqlColumnList {
   SqlColumnListImpl();
@@ -127,7 +129,7 @@ class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
 }
 
 abstract class SqlTableImpl extends sql.CustomSqlNodeBase
-    implements SqlTable, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
+    implements SqlTable, sql.ChildrenLockingSupport {
   final SqlTableImpl target;
 
   final String name;
@@ -155,7 +157,8 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   SqlTable get main => isAliased ? target.main : this;
 
   @override
-  SqlTable alias(String alias) => createTableAlias(alias);
+  SqlTable alias(String alias) =>
+      nodeManager.registerNode(createTableAlias(alias));
 
   SqlColumn column(String name) {
     var column;
@@ -167,7 +170,7 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
     } else {
       column = new SqlColumnImpl(name, isPrimaryKey, this);
     }
-    return column;
+    return nodeManager.registerNode(column);
   }
 
   @override
@@ -216,13 +219,10 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   Set<String> get primaryKeyNames;
 
   SqlTable createTableAlias(String alias);
-
-  @override
-  createNode() => isRegistered ? this : sql.registerNode(clone());
 }
 
 class SqlColumnImpl extends sql.CustomSqlNodeBase
-    implements SqlColumn, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
+    implements SqlColumn, sql.ChildrenLockingSupport {
   final SqlTable table;
 
   final SqlColumn target;
@@ -252,8 +252,8 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
         super.cloneFrom(target, freeze);
 
   @override
-  SqlColumn alias(String alias) =>
-      new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table);
+  SqlColumn alias(String alias) => nodeManager.registerNode(
+      new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table));
 
   @override
   sql.SqlNode get as => isAliased ? sql.as(target, name) : this;
@@ -287,9 +287,6 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
 
   @override
   sql.SqlNode get unqualified => sql.normalize(name).single;
-
-  @override
-  createNode() => isRegistered ? this : sql.registerNode(clone());
 
   @override
   SqlColumnImpl createClone(bool freeze) =>

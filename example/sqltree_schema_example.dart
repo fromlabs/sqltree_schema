@@ -40,10 +40,4 @@ main() {
         schema.USERS.alias("MY_USERS").as))));
 
   schema.USERS.alias("a1").ID.alias("a2");
-
-  var select = sql.select(sql.setDisabled(true, schema.USERS.ID));
-
-  print(sql.prettify(sql.format(select.getSingleNodeByReference("myid"))));
-
-  print(sql.prettify(sql.format(schema.USERS.ID)));
 }

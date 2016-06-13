@@ -5,7 +5,7 @@ library users_schema;
 
 import 'package:sqltree_schema/sqltree_schema_generator.dart';
 
-final USERS_Table USERS = new _USERS_Table_Impl();
+USERS_Table get USERS => registerTable(new _USERS_Table_Impl());
 
 abstract class USERS_Table implements SqlTable {
   SqlColumn get ID;
