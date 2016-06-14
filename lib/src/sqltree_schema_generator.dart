@@ -35,6 +35,9 @@ class FileSchemaGenerator extends SchemaGenerator {
 
   Future _save(String libraryContents) async {
     var file = new File(libraryPath);
+
+    await file.create(recursive: true);
+
     await file.writeAsString(libraryContents);
   }
 }
