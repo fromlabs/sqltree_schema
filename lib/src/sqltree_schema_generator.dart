@@ -7,11 +7,11 @@ import "dart:async";
 class TableDescriptor {
   final String name;
 
-  final List<String> primaryKeys;
+  final List<String> primaryKeys = [];
 
   final List<ColumnDescriptor> columns = [];
 
-  TableDescriptor(this.name, this.primaryKeys);
+  TableDescriptor(this.name);
 }
 
 class ColumnDescriptor {
@@ -29,8 +29,8 @@ class FileSchemaGenerator extends SchemaGenerator {
       {String copyrightText: ""})
       : super(libraryName, copyrightText: copyrightText);
 
-  Future generateAndSave() {
-    return _save(generate());
+  Future generateAndSave() async {
+    return _save(await generate());
   }
 
   Future _save(String libraryContents) async {
@@ -48,7 +48,7 @@ class SchemaGenerator {
 
   SchemaGenerator(this.libraryName, {this.copyrightText: ""});
 
-  String generate() {
+  Future<String> generate() async {
     StringBuffer buffer = new StringBuffer();
 
     createLibrary(buffer);
@@ -72,7 +72,7 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
   void createTable(TableDescriptor table, StringBuffer buffer) {
     var tableName = table.name.toUpperCase();
     var tableClass = "${tableName}_Table";
-    var tableImpl = "${tableClass}Impl";
+    var tableImpl = "_${tableClass}Impl";
 
     // FIELD
     buffer.write("""

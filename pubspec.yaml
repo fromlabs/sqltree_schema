@@ -1,15 +1,14 @@
 name: sqltree_schema
-description: A starting point for Dart libraries or applications.
+description: Schema support for the sqltree library.
 version: 0.0.1
-#author: Roberto Tassi <email@example.com>
-#homepage: https://www.example.com
+author: Roberto Tassi <roberto.tassi@fromlabs.org>
+homepage: https://github.com/fromlabs/sqltree_schema
 
 environment:
-  sdk: '>=1.0.0 <2.0.0'
+  sdk: ">=1.8.0 <2.0.0"
 
 dependencies:
-  sqltree:
-    path: ../sqltree
+  sqltree: "^0.0.1"
 
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'
