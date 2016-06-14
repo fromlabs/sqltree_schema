@@ -246,7 +246,8 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   }
 
   @override
-  sql.SqlNode get as => this.isAliased ? sql.as(target, name) : this;
+  sql.SqlNode get as =>
+      this.isAliased ? sql.as(target, name) : sql.as(this, name);
 
   @override
   sql.SqlNode get unqualified => sql.normalize(name).single;
@@ -326,7 +327,8 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   }
 
   @override
-  sql.SqlNode get as => isAliased ? sql.as(target, name) : this;
+  sql.SqlNode get as =>
+      isAliased ? sql.as(target, name) : sql.as(this, qualifiedName);
 
   @override
   SqlColumn get autoAlias => preAlias("${table.name}_");
@@ -341,19 +343,16 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   SqlColumn get main => isAliased || table.isAliased ? target.main : this;
 
   @override
-  sql.SqlNode get parameter => sql.parameter(parameterName);
+  sql.SqlNode get parameter => sql.parameter(qualifiedName);
 
   @override
-  String get parameterName => isAliased ? name : "${table.name}.$name";
+  String get qualifiedName => isAliased ? name : "${table.name}.$name";
 
   @override
   SqlColumn postAlias(String postfix) => this.alias("$name$postfix");
 
   @override
   SqlColumn preAlias(String prefix) => this.alias("$prefix$name");
-
-  @override
-  String get selectName => isAliased ? name : "${main.table.name}.${main.name}";
 
   @override
   sql.SqlNode get unqualified => sql.normalize(name).single;

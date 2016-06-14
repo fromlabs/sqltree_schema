@@ -49,8 +49,28 @@ main() {
 
   print(sql.prettify(sql.format(select)));
 
-  select = sql.select(schema.USERS.ID)
-    ..from(sql.setReference("USERS", schema.USERS));
+  select = sql.select(
+      schema.USERS.ID,
+      schema.USERS.ID.alias("MY_ID"),
+      schema.USERS.alias("MY_USERS").ID,
+      schema.USERS.alias("MY_USERS").ID.alias("MY_ID"))
+    ..from(schema.USERS, schema.USERS.as, schema.USERS.alias("MY_USERS"),
+        schema.USERS.alias("MY_USERS").as);
 
   print(sql.prettify(sql.format(select)));
+
+  var i = 0;
+  print(select.selectClause.children[i].isFreezed);
+  print(select.selectClause.children[i++].main.isFreezed);
+  print(select.selectClause.children[i].target.isFreezed);
+  print(select.selectClause.children[i++].main.isFreezed);
+  print(select.selectClause.children[i].target.isFreezed);
+  print(select.selectClause.children[i++].main.isFreezed);
+  print(select.selectClause.children[i].target.isFreezed);
+  print(select.selectClause.children[i++].main.isFreezed);
+
+  print(sql.prettify(sql.format(schema.USERS.alias("MY_USERS").as)));
+  print(sql.prettify(sql.format(schema.USERS.ID.alias("MY_ID").as)));
+  print(sql.prettify(sql.format(schema.USERS.as)));
+  print(sql.prettify(sql.format(schema.USERS.ID.as)));
 }

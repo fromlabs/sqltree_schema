@@ -30,7 +30,7 @@ void _registerFormatters(ExtTypes types) {
     if (node is SqlTable) {
       return node.name;
     } else if (node is SqlColumn) {
-      return node.parameterName;
+      return node.qualifiedName;
     }
   });
 }
@@ -62,6 +62,8 @@ abstract class SqlTable implements SqlNode {
 abstract class SqlColumn implements SqlNode {
   String get name;
 
+  String get qualifiedName;
+
   SqlTable get table;
 
   bool get isAliased;
@@ -71,10 +73,6 @@ abstract class SqlColumn implements SqlNode {
   SqlColumn get target;
 
   bool get isPrimaryKey;
-
-  String get parameterName;
-
-  String get selectName;
 
   SqlColumn alias(String alias);
 

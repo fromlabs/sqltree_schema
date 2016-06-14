@@ -3,7 +3,7 @@
 
 library users_schema;
 
-import 'package:sqltree_schema/sqltree_schema_generator.dart';
+import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
 final USERS_Table USERS = registerSharedTable(new _USERS_Table_Impl());
 
