@@ -4,7 +4,8 @@
 import "package:sqltree/sqltree.dart" as sql;
 import "sqltree_schema.dart";
 
-registerTable(SqlTable table) => sql.registerNode(table);
+registerSharedTable(SqlTable table) =>
+    sql.registerNode(table).clone(freeze: true).._share();
 
 class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
     implements SqlColumnList {
@@ -129,10 +130,16 @@ class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
 }
 
 abstract class SqlTableImpl extends sql.CustomSqlNodeBase
-    implements SqlTable, sql.ChildrenLockingSupport {
+    implements SqlTable, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final SqlTableImpl target;
 
   final String name;
+
+  final Map<String, SqlColumn> _cachedColumns = {};
+
+  final Map<String, SqlTable> _cachedTableAliases = {};
+
+  bool _isShared = false;
 
   SqlTableImpl(this.name)
       : this.target = null,
@@ -150,6 +157,12 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
         this.target = target.target,
         super.cloneFrom(target, freeze);
 
+  bool get isShared => _isShared;
+
+  void _share() {
+    _isShared = true;
+  }
+
   @override
   bool get isAliased => target != null && name != target.name;
 
@@ -157,20 +170,44 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   SqlTable get main => isAliased ? target.main : this;
 
   @override
-  SqlTable alias(String alias) =>
-      nodeManager.registerNode(createTableAlias(alias));
+  SqlTable alias(String alias) {
+    SqlTableImpl table = _cachedTableAliases[alias];
+    if (table == null) {
+      table = nodeManager.registerNode(createTableAlias(alias));
+
+      if (isShared) {
+        table = table.clone(freeze: true);
+
+        table._share();
+
+        _cachedTableAliases[alias] = table;
+      }
+    }
+    return table;
+  }
 
   SqlColumn column(String name) {
-    var column;
-    bool isPrimaryKey = primaryKeyNames.contains(name);
-    if (target != null) {
-      var targetColumn = target.column(name);
-      column =
-          new SqlColumnImpl.aliased(name, targetColumn, isPrimaryKey, this);
-    } else {
-      column = new SqlColumnImpl(name, isPrimaryKey, this);
+    SqlColumnImpl column = _cachedColumns[name];
+    if (column == null) {
+      bool isPrimaryKey = primaryKeyNames.contains(name);
+      if (target != null) {
+        var targetColumn = target.column(name);
+        column =
+            new SqlColumnImpl.aliased(name, targetColumn, isPrimaryKey, this);
+      } else {
+        column = new SqlColumnImpl(name, isPrimaryKey, this);
+      }
+      column = nodeManager.registerNode(column);
+
+      if (isShared) {
+        column = column.clone(freeze: true);
+
+        column._share();
+
+        _cachedColumns[name] = column;
+      }
     }
-    return nodeManager.registerNode(column);
+    return column;
   }
 
   @override
@@ -219,10 +256,19 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   Set<String> get primaryKeyNames;
 
   SqlTable createTableAlias(String alias);
+
+  @override
+  createNode() {
+    if (isShared) {
+      return this.clone(freeze: false);
+    } else {
+      return this;
+    }
+  }
 }
 
 class SqlColumnImpl extends sql.CustomSqlNodeBase
-    implements SqlColumn, sql.ChildrenLockingSupport {
+    implements SqlColumn, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final SqlTable table;
 
   final SqlColumn target;
@@ -230,6 +276,10 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   final String name;
 
   final bool isPrimaryKey;
+
+  final Map<String, SqlColumn> _cachedColumnAliases = {};
+
+  bool _isShared = false;
 
   SqlColumnImpl(this.name, this.isPrimaryKey, this.table)
       : this.target = null,
@@ -251,9 +301,29 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
         this.table = target.table,
         super.cloneFrom(target, freeze);
 
+  bool get isShared => _isShared;
+
+  void _share() {
+    _isShared = true;
+  }
+
   @override
-  SqlColumn alias(String alias) => nodeManager.registerNode(
-      new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table));
+  SqlColumn alias(String alias) {
+    SqlColumnImpl column = _cachedColumnAliases[alias];
+    if (column == null) {
+      column = nodeManager.registerNode(
+          new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table));
+
+      if (isShared) {
+        column = column.clone(freeze: true);
+
+        column._share();
+
+        _cachedColumnAliases[alias] = column;
+      }
+    }
+    return column;
+  }
 
   @override
   sql.SqlNode get as => isAliased ? sql.as(target, name) : this;
@@ -291,4 +361,13 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   @override
   SqlColumnImpl createClone(bool freeze) =>
       new SqlColumnImpl.cloneFrom(this, freeze);
+
+  @override
+  createNode() {
+    if (isShared) {
+      return this.clone(freeze: false);
+    } else {
+      return this;
+    }
+  }
 }

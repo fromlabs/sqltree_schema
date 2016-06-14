@@ -39,5 +39,18 @@ main() {
     ..from(schema.USERS, schema.USERS.as, schema.USERS.alias("MY_USERS"),
         schema.USERS.alias("MY_USERS").as))));
 
-  schema.USERS.alias("a1").ID.alias("a2");
+  print("******************************");
+  var select = sql.select(schema.USERS.ID)
+    ..from(sql.setReference("USERS", schema.USERS));
+
+  print(sql.prettify(sql.format(select)));
+
+  select.getSingleNodeByReference("USERS").disable();
+
+  print(sql.prettify(sql.format(select)));
+
+  select = sql.select(schema.USERS.ID)
+    ..from(sql.setReference("USERS", schema.USERS));
+
+  print(sql.prettify(sql.format(select)));
 }
