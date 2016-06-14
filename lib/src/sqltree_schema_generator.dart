@@ -4,6 +4,14 @@
 import "dart:io";
 import "dart:async";
 
+class SchemaDescriptor {
+  final String name;
+
+  final List<TableDescriptor> tables = [];
+
+  SchemaDescriptor(this.name);
+}
+
 class TableDescriptor {
   final String name;
 
@@ -25,9 +33,9 @@ class ColumnDescriptor {
 class FileSchemaGenerator extends SchemaGenerator {
   final String libraryPath;
 
-  FileSchemaGenerator(String libraryName, this.libraryPath,
+  FileSchemaGenerator(String libraryName, String schemaName, this.libraryPath,
       {String copyrightText: ""})
-      : super(libraryName, copyrightText: copyrightText);
+      : super(libraryName, schemaName, copyrightText: copyrightText);
 
   Future generateAndSave() async {
     return _save(await generate());
@@ -45,20 +53,21 @@ class FileSchemaGenerator extends SchemaGenerator {
 class SchemaGenerator {
   final String libraryName;
 
+  final String schemaName;
+
   final String copyrightText;
 
   final List<TableDescriptor> tables = [];
 
-  SchemaGenerator(this.libraryName, {this.copyrightText: ""});
+  SchemaGenerator(this.libraryName, this.schemaName, {this.copyrightText: ""});
 
   Future<String> generate() async {
     StringBuffer buffer = new StringBuffer();
 
     createLibrary(buffer);
 
-    for (var table in tables) {
-      createTable(table, buffer);
-    }
+    createSchema(buffer);
+
     return buffer.toString();
   }
 
@@ -72,17 +81,104 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
 """);
   }
 
+  void createSchema(StringBuffer buffer) {
+    var schemaClass = "${schemaName}_Schema";
+    var schemaImpl = "_${schemaClass}Impl";
+
+    // FIELD
+    buffer.write("""
+final $schemaClass DEFAULT_SCHEMA = createSchema("");
+""");
+
+    buffer.writeln();
+    buffer.write("""
+$schemaClass createSchema(String name) =>
+    registerSharedSchema(new $schemaImpl(name));
+""");
+
+    // INTERFACE
+    buffer.writeln();
+    buffer.write("""
+abstract class $schemaClass implements SqlSchema {
+""");
+
+    for (var table in tables) {
+      var tableName = table.name.toUpperCase();
+      var tableClass = "${tableName}_Table";
+
+      buffer.write("""
+  $tableClass get $tableName;
+""");
+    }
+
+    buffer.write("""
+}
+""");
+
+    buffer.writeln();
+
+    // IMPLEMENTATION
+    buffer.write("""
+class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
+  $schemaImpl(String name) : super(name);
+
+  $schemaImpl.cloneFrom($schemaImpl target, bool freeze)
+      : super.cloneFrom(target, freeze);
+""");
+
+    buffer.writeln();
+    for (var table in tables) {
+      var tableName = table.name.toUpperCase();
+      var tableClass = "${tableName}_Table";
+
+      buffer.write("""
+  @override
+  $tableClass get $tableName => table("${table.name}");
+""");
+      buffer.writeln();
+    }
+
+    buffer.write("""
+  @override
+  SqlTableImpl createTable(String name) {
+    switch (name) {
+""");
+
+    for (var table in tables) {
+      var tableName = table.name.toUpperCase();
+      var tableClass = "${tableName}_Table";
+      var tableImpl = "_${tableClass}Impl";
+
+      buffer.write("""
+      case "${table.name}":
+        return new $tableImpl(this);
+""");
+    }
+
+    buffer.write("""
+      default:
+        throw new UnsupportedError("Table not exist \$name");
+    }
+  }
+""");
+
+    buffer.writeln();
+    buffer.write("""
+  @override
+  $schemaImpl createClone(bool freeze) =>
+      new $schemaImpl.cloneFrom(this, freeze);
+}
+""");
+
+    for (var table in tables) {
+      createTable(table, buffer);
+    }
+  }
+
   void createTable(TableDescriptor table, StringBuffer buffer) {
     var tableName = table.name.toUpperCase();
     var tableClass = "${tableName}_Table";
     var tableImpl = "_${tableClass}Impl";
-
-    // FIELD
-    buffer.write("""
-final $tableClass $tableName = registerSharedTable(new $tableImpl());
-""");
-
-    buffer.writeln();
 
     // INTERFACE
     buffer.write("""
@@ -109,7 +205,7 @@ class $tableImpl extends SqlTableImpl implements $tableClass {
   static final Set<String> _pkNames = new Set.from([${table.primaryKeys.map((pk) => "\"$pk\"").join(", ")}]);
   static final Set<String> _columnNames = new Set.from([${table.columns.map((col) => "\"${col.name}\"").join(", ")}]);
 
-  $tableImpl() : super("${table.name}");
+  $tableImpl(SqlSchema schema) : super("${table.name}", schema);
 
   $tableImpl.aliased(String alias, $tableImpl target)
       : super.aliased(alias, target);
@@ -144,109 +240,4 @@ class $tableImpl extends SqlTableImpl implements $tableClass {
 }
 """);
   }
-
-  var s = """
-abstract class USERS_Table implements SqlTable {
-  SqlColumn get ID;
-  SqlColumn get GROUP_ID;
-  SqlColumn get AUTHOR_ID;
-  SqlColumn get REVIEWER_ID;
-  SqlColumn get PUBLISHER_ID;
-  SqlColumn get STATUS;
-  SqlColumn get MAIN_LOCALE;
-  SqlColumn get CATEGORY;
-  SqlColumn get TITLE;
-  SqlColumn get ABSTRACT;
-  SqlColumn get ABSTRACT_IMAGE_URL;
-  SqlColumn get BODY;
-  SqlColumn get PUBLISHING_DATE;
-  SqlColumn get CREATION_TIMESTAMP;
-
-  USERS_Table alias(String alias);
-}
-
-class _USERS_Table_Impl extends SqlTableImpl implements USERS_Table {
-  static final Set<String> _pkNames = new Set.from(["ID"]);
-  static final Set<String> _columnNames = new Set.from([
-    "ID",
-    "GROUP_ID",
-    "AUTHOR_ID",
-    "REVIEWER_ID",
-    "PUBLISHER_ID",
-    "STATUS",
-    "MAIN_LOCALE",
-    "CATEGORY",
-    "TITLE",
-    "ABSTRACT",
-    "ABSTRACT_IMAGE_URL",
-    "BODY",
-    "PUBLISHING_DATE",
-    "CREATION_TIMESTAMP"
-  ]);
-
-  _USERS_Table_Impl() : super("USERS");
-
-  _USERS_Table_Impl.aliased(String alias, SqlTable target)
-      : super.aliased(alias, target);
-
-  _USERS_Table_Impl.cloneFrom(_USERS_Table_Impl target, bool freeze)
-      : super.cloneFrom(target, freeze);
-
-  @override
-  SqlColumn get ID => column("ID");
-
-  @override
-  SqlColumn get ABSTRACT => column("ABSTRACT");
-
-  @override
-  SqlColumn get ABSTRACT_IMAGE_URL => column("ABSTRACT_IMAGE_URL");
-
-  @override
-  SqlColumn get AUTHOR_ID => column("AUTHOR_ID");
-
-  @override
-  SqlColumn get BODY => column("BODY");
-
-  @override
-  SqlColumn get CATEGORY => column("CATEGORY");
-
-  @override
-  SqlColumn get CREATION_TIMESTAMP => column("CREATION_TIMESTAMP");
-
-  @override
-  SqlColumn get GROUP_ID => column("GROUP_ID");
-
-  @override
-  SqlColumn get MAIN_LOCALE => column("MAIN_LOCALE");
-
-  @override
-  SqlColumn get PUBLISHER_ID => column("PUBLISHER_ID");
-
-  @override
-  SqlColumn get PUBLISHING_DATE => column("PUBLISHING_DATE");
-
-  @override
-  SqlColumn get REVIEWER_ID => column("REVIEWER_ID");
-
-  @override
-  SqlColumn get STATUS => column("STATUS");
-
-  @override
-  SqlColumn get TITLE => column("TITLE");
-
-  @override
-  Set<String> get primaryKeyNames => _pkNames;
-
-  @override
-  Set<String> get columnNames => _columnNames;
-
-  @override
-  _USERS_Table_Impl createClone(bool freeze) =>
-      new _USERS_Table_Impl.cloneFrom(this, freeze);
-
-  @override
-  SqlTable createTableAlias(String alias) =>
-      new _USERS_Table_Impl.aliased(alias, this);
-}
-""";
 }

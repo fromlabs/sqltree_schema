@@ -6,8 +6,9 @@ import "package:sqltree/sqltree.dart";
 final ExtTypes types = new ExtTypes();
 
 class ExtTypes {
-  final String TABLE = "TBL";
-  final String COLUMN = "COL";
+  final String SCHEMA = "SCHEMA";
+  final String TABLE = "TABLE";
+  final String COLUMN = "COLUMN";
 
   ExtTypes() {
     _registerTypes(this);
@@ -16,6 +17,7 @@ class ExtTypes {
   }
 
   void _registerTypes(ExtTypes types) {
+    registerNodeType(types.SCHEMA);
     registerNodeType(types.TABLE);
     registerNodeType(types.COLUMN);
   }
@@ -27,22 +29,39 @@ void _initialize(ExtTypes types) {
 
 void _registerFormatters(ExtTypes types) {
   registerNodeFormatter((node, formattedChildren) {
-    if (node is SqlTable) {
-      return node.name;
-    } else if (node is SqlColumn) {
+    if (node is SqlColumn) {
       return node.qualifiedName;
+    } else if (node is SqlTable) {
+      return node.qualifiedName;
+    } else if (node is SqlSchema) {
+      return node.name;
     }
+    return null;
   });
+}
+
+abstract class SqlSchema implements SqlNode {
+  String get name;
+
+  bool get isDefault;
+
+  SqlTable table(String name);
+
+  SqlTable clone({bool freeze});
 }
 
 abstract class SqlTable implements SqlNode {
   String get name;
+
+  String get qualifiedName;
 
   bool get isAliased;
 
   SqlTable get main;
 
   SqlTable get target;
+
+  SqlSchema get schema;
 
   SqlTable alias(String alias);
 

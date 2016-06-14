@@ -3,7 +3,11 @@
 
 import 'package:sqltree/sqltree.dart' as sql;
 
-import 'users_schema.g.dart' as schema;
+import 'users_schema.g.dart';
+
+final USERSDB_Schema schema = DEFAULT_SCHEMA;
+
+final USERSDB_Schema OTHER_SCHEMA = createSchema("OTHER");
 
 main() {
   print(sql.prettify(sql.format(
@@ -73,4 +77,38 @@ main() {
   print(sql.prettify(sql.format(schema.USERS.ID.alias("MY_ID").as)));
   print(sql.prettify(sql.format(schema.USERS.as)));
   print(sql.prettify(sql.format(schema.USERS.ID.as)));
+
+  print("******************************++++++++++");
+  print(sql.format(DEFAULT_SCHEMA));
+  print(sql.format(DEFAULT_SCHEMA.USERS));
+  print(sql.format(DEFAULT_SCHEMA.USERS.as));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS")));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").as));
+  print(sql.format(OTHER_SCHEMA));
+  print(sql.format(OTHER_SCHEMA.USERS));
+  print(sql.format(OTHER_SCHEMA.USERS.as));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS")));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").as));
+  print("******************************");
+  print(sql.format(DEFAULT_SCHEMA.USERS.ID));
+  print(sql.format(DEFAULT_SCHEMA.USERS.ID.as));
+  print(sql.format(DEFAULT_SCHEMA.USERS.ID.alias("MY_ID")));
+  print(sql.format(DEFAULT_SCHEMA.USERS.ID.alias("MY_ID").as));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.as));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID")));
+  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID").as));
+  print(sql.format(OTHER_SCHEMA.USERS.ID));
+  print(sql.format(OTHER_SCHEMA.USERS.ID.as));
+  print(sql.format(OTHER_SCHEMA.USERS.ID.alias("MY_ID")));
+  print(sql.format(OTHER_SCHEMA.USERS.ID.alias("MY_ID").as));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").ID));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").ID.as));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID")));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID").as));
+  print("******************************");
+  print(sql.format(OTHER_SCHEMA.USERS));
+  print(sql.format(OTHER_SCHEMA.USERS.as));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS")));
+  print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").as));
 }

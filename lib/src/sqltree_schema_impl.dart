@@ -4,8 +4,8 @@
 import "package:sqltree/sqltree.dart" as sql;
 import "sqltree_schema.dart";
 
-registerSharedTable(SqlTable table) =>
-    sql.registerNode(table).clone(freeze: true).._share();
+registerSharedSchema(SqlSchema schema) =>
+    sql.registerNode(schema).clone(freeze: true).._share();
 
 class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
     implements SqlColumnList {
@@ -129,11 +129,69 @@ class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
       new SqlColumnListImpl.cloneFrom(this, freeze);
 }
 
+abstract class SqlSchemaImpl extends sql.CustomSqlNodeBase
+    implements SqlSchema, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
+  final String name;
+
+  final Map<String, SqlTable> _cachedTables = {};
+
+  bool _isShared = false;
+
+  SqlSchemaImpl(this.name) : super(types.SCHEMA, maxChildrenLength: 0);
+
+  SqlSchemaImpl.cloneFrom(SqlSchemaImpl target, bool freeze)
+      : this.name = target.name,
+        super.cloneFrom(target, freeze);
+
+  @override
+  bool get isDefault => name.isEmpty;
+
+  bool get isShared => _isShared;
+
+  void _share() {
+    _isShared = true;
+  }
+
+  SqlTableImpl createTable(String name);
+
+  SqlTable table(String name) {
+    SqlTableImpl table = _cachedTables[name];
+    if (table == null) {
+      table = createTable(name);
+
+      table = nodeManager.registerNode(table);
+
+      if (isShared) {
+        table = table.clone(freeze: true);
+
+        table._share();
+
+        _cachedTables[name] = table;
+      }
+    }
+    return table;
+  }
+
+  @override
+  createNode() {
+    if (isShared) {
+      return this.clone(freeze: false);
+    } else {
+      return this;
+    }
+  }
+
+  @override
+  String toString() => isDefault ? "DEFAULT_SCHEMA" : name;
+}
+
 abstract class SqlTableImpl extends sql.CustomSqlNodeBase
     implements SqlTable, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
-  final SqlTableImpl target;
-
   final String name;
+
+  final SqlSchema schema;
+
+  final SqlTableImpl target;
 
   final Map<String, SqlColumn> _cachedColumns = {};
 
@@ -141,12 +199,14 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
 
   bool _isShared = false;
 
-  SqlTableImpl(this.name)
+  SqlTableImpl(this.name, this.schema)
       : this.target = null,
         super(types.TABLE, maxChildrenLength: 0);
 
-  SqlTableImpl.aliased(this.name, this.target)
-      : super(types.TABLE, maxChildrenLength: 0) {
+  SqlTableImpl.aliased(this.name, SqlTableImpl target)
+      : this.schema = target.schema,
+        this.target = target,
+        super(types.TABLE, maxChildrenLength: 0) {
     if (this.target.isAliased) {
       throw new StateError("Table already aliased: $name");
     }
@@ -154,6 +214,7 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
 
   SqlTableImpl.cloneFrom(SqlTableImpl target, bool freeze)
       : this.name = target.name,
+        this.schema = target.schema,
         this.target = target.target,
         super.cloneFrom(target, freeze);
 
@@ -162,6 +223,10 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   void _share() {
     _isShared = true;
   }
+
+  @override
+  String get qualifiedName =>
+      isAliased || schema.isDefault ? name : "${schema.name}.$name";
 
   @override
   bool get isAliased => target != null && name != target.name;
@@ -266,6 +331,9 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
       return this;
     }
   }
+
+  @override
+  String toString() => name;
 }
 
 class SqlColumnImpl extends sql.CustomSqlNodeBase
@@ -369,4 +437,7 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
       return this;
     }
   }
+
+  @override
+  String toString() => qualifiedName;
 }

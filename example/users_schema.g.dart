@@ -4,8 +4,38 @@ library users_schema;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
-final USERS_Table USERS = registerSharedTable(new _USERS_TableImpl());
+final USERSDB_Schema DEFAULT_SCHEMA = createSchema("");
 
+USERSDB_Schema createSchema(String name) =>
+    registerSharedSchema(new _USERSDB_SchemaImpl(name));
+
+abstract class USERSDB_Schema implements SqlSchema {
+  USERS_Table get USERS;
+}
+
+class _USERSDB_SchemaImpl extends SqlSchemaImpl implements USERSDB_Schema {
+  _USERSDB_SchemaImpl(String name) : super(name);
+
+  _USERSDB_SchemaImpl.cloneFrom(_USERSDB_SchemaImpl target, bool freeze)
+      : super.cloneFrom(target, freeze);
+
+  @override
+  USERS_Table get USERS => table("USERS");
+
+  @override
+  SqlTableImpl createTable(String name) {
+    switch (name) {
+      case "USERS":
+        return new _USERS_TableImpl(this);
+      default:
+        throw new UnsupportedError("Table not exist $name");
+    }
+  }
+
+  @override
+  _USERSDB_SchemaImpl createClone(bool freeze) =>
+      new _USERSDB_SchemaImpl.cloneFrom(this, freeze);
+}
 abstract class USERS_Table implements SqlTable {
   SqlColumn get ID;
   SqlColumn get GROUP_ID;
@@ -29,7 +59,7 @@ class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
   static final Set<String> _pkNames = new Set.from(["ID"]);
   static final Set<String> _columnNames = new Set.from(["ID", "GROUP_ID", "AUTHOR_ID", "REVIEWER_ID", "PUBLISHER_ID", "STATUS", "MAIN_LOCALE", "CATEGORY", "TITLE", "ABSTRACT", "ABSTRACT_IMAGE_URL", "BODY", "PUBLISHING_DATE", "CREATION_TIMESTAMP"]);
 
-  _USERS_TableImpl() : super("USERS");
+  _USERS_TableImpl(SqlSchema schema) : super("USERS", schema);
 
   _USERS_TableImpl.aliased(String alias, _USERS_TableImpl target)
       : super.aliased(alias, target);
