@@ -3,7 +3,7 @@
 
 import 'package:sqltree/sqltree.dart' as sql;
 
-import 'users_schema.dart' as schema;
+import 'users_schema.g.dart' as schema;
 
 main() {
   sql.select(
