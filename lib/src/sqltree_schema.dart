@@ -112,7 +112,7 @@ abstract class SqlColumn implements SqlNode {
   SqlColumn clone({bool freeze});
 }
 
-abstract class SqlColumnList implements CustomSqlNodeList<SqlColumn> {
+abstract class SqlColumnIterable implements SqlNodeIterable<SqlColumn> {
   SqlColumnList exclude(SqlColumn column0,
       [SqlColumn column1,
       SqlColumn column2,
@@ -124,19 +124,54 @@ abstract class SqlColumnList implements CustomSqlNodeList<SqlColumn> {
       SqlColumn column8,
       SqlColumn column9]);
 
-  SqlColumnList get autoAlias;
+  SqlColumnIterable get autoAlias;
 
-  SqlColumnList preAlias(String prefix);
+  SqlColumnIterable preAlias(String prefix);
 
-  SqlColumnList postAlias(String postfix);
+  SqlColumnIterable postAlias(String postfix);
 
-  SqlNodeList get as;
+  SqlNodeIterable<SqlNode> get as;
 
-  SqlNodeList get unqualified;
+  SqlNodeIterable<SqlNode> get unqualified;
 
-  SqlNodeList get parameter;
+  SqlNodeIterable<SqlNode> get parameter;
 
-  SqlNodeList get equalParameter;
+  SqlNodeIterable<SqlNode> get equalParameter;
 
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable whereReference(String reference);
+
+  SqlColumnIterable whereDeep(bool test(SqlColumn element));
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable expand(Iterable f(SqlColumn element));
+
+  SqlColumnIterable map(f(SqlColumn element));
+
+  SqlColumnIterable skip(int n);
+
+  SqlColumnIterable skipWhile(bool test(SqlColumn value));
+
+  SqlColumnIterable take(int n);
+
+  SqlColumnIterable takeWhile(bool test(SqlColumn value));
+
+  SqlColumnList toList({bool growable: true});
+
+  SqlColumnIterable where(bool test(SqlColumn element));
+}
+
+abstract class SqlColumnList
+    implements SqlColumnIterable, SqlNodeList<SqlColumn> {
   SqlColumnList clone({bool freeze});
+
+  /* FROM LIST */
+
+  SqlColumnIterable getRange(int start, int end);
+
+  SqlColumnIterable get reversed;
+
+  SqlColumnList sublist(int start, [int end]);
 }

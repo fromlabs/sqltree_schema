@@ -3,6 +3,8 @@
 
 import 'package:sqltree/sqltree.dart' as sql;
 
+import 'package:sqltree_schema/sqltree_schema.dart' as sql;
+
 import 'users_schema.g.dart';
 
 final USERSDB_Schema schema = DEFAULT_SCHEMA;
@@ -10,12 +12,30 @@ final USERSDB_Schema schema = DEFAULT_SCHEMA;
 final USERSDB_Schema OTHER_SCHEMA = createSchema("OTHER");
 
 main() {
+
+  var select2 = sql.select(schema.USERS.ID)
+    ..from(sql.setReference("USERS", schema.USERS));
+
+  // select2.fromClause.children.first.reference = "USERS";
+
+  print(select2.fromClause.children.first.reference);
+
+  print(sql.prettify(sql.format(select2)));
+
+  print(select2.fromClause.children.first.reference);
+
+  select2.whereReference("USERS").single.disable();
+
+  print(sql.prettify(sql.format(select2)));
+
   print(sql.prettify(sql.format(
       sql.select(schema.USERS.ID, schema.USERS.columns)..from(schema.USERS))));
 
   print(sql.prettify(sql.format(sql.select(schema.USERS.columns)
     ..from(schema.USERS)
     ..where(schema.USERS.pkColumns.equalParameter))));
+
+  schema.USERS.pkColumns.equalParameter;
 
   print(sql.prettify(sql.format(sql.insert(schema.USERS)
     ..columns(schema.USERS.detailColumns)
@@ -30,6 +50,8 @@ main() {
 
   print(sql.prettify(sql.format(sql.select(
       schema.USERS.columns.exclude(schema.USERS.ID, schema.USERS.GROUP_ID)))));
+
+
 
   print(sql.prettify(sql.format(sql.select(
       schema.USERS.ID,
@@ -49,7 +71,7 @@ main() {
 
   print(sql.prettify(sql.format(select)));
 
-  select.getSingleNodeByReference("USERS").disable();
+  select.whereReference("USERS").single.disable();
 
   print(sql.prettify(sql.format(select)));
 

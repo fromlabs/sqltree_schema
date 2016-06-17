@@ -7,128 +7,6 @@ import "sqltree_schema.dart";
 registerSharedSchema(SqlSchema schema) =>
     sql.registerNode(schema).clone(freeze: true).._share();
 
-class SqlColumnListImpl extends sql.CustomSqlNodeListBase<SqlColumn>
-    implements SqlColumnList {
-  SqlColumnListImpl();
-
-  SqlColumnListImpl.cloneFrom(SqlColumnListImpl target, bool freeze)
-      : super.cloneFrom(target, freeze);
-
-  @override
-  sql.SqlNodeList get as {
-    sql.SqlNodeList list = new sql.CustomSqlNodeList();
-
-    for (var column in this) {
-      list.add(column.as);
-    }
-
-    return list;
-  }
-
-  @override
-  SqlColumnList get autoAlias {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var column in this) {
-      list.add(column.autoAlias);
-    }
-
-    return list;
-  }
-
-  @override
-  sql.SqlNodeList get equalParameter {
-    sql.SqlNodeList list = new sql.CustomSqlNodeList();
-
-    for (var column in this) {
-      list.add(column.equalParameter);
-    }
-
-    return list;
-  }
-
-  @override
-  SqlColumnList exclude(SqlColumn column0,
-      [SqlColumn column1,
-      SqlColumn column2,
-      SqlColumn column3,
-      SqlColumn column4,
-      SqlColumn column5,
-      SqlColumn column6,
-      SqlColumn column7,
-      SqlColumn column8,
-      SqlColumn column9]) {
-    var excludedNodes = sql.normalize(column0, column1, column2, column3,
-        column4, column5, column6, column7, column8, column9);
-
-    var list = new SqlColumnListImpl();
-
-    for (var node in this) {
-      bool exclude = false;
-      for (var excludeNode in excludedNodes) {
-        if (node.name == excludeNode.name &&
-            node.table.name == excludeNode.table.name) {
-          exclude = true;
-          break;
-        }
-      }
-      if (!exclude) {
-        list.add(node);
-      }
-    }
-
-    return list;
-  }
-
-  @override
-  sql.SqlNodeList get parameter {
-    sql.SqlNodeList list = new sql.CustomSqlNodeList();
-
-    for (var column in this) {
-      list.add(column.parameter);
-    }
-
-    return list;
-  }
-
-  @override
-  SqlColumnList postAlias(String postfix) {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var column in this) {
-      list.add(column.postAlias(postfix));
-    }
-
-    return list;
-  }
-
-  @override
-  SqlColumnList preAlias(String prefix) {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var column in this) {
-      list.add(column.preAlias(prefix));
-    }
-
-    return list;
-  }
-
-  @override
-  sql.SqlNodeList get unqualified {
-    sql.SqlNodeList list = new sql.CustomSqlNodeList();
-
-    for (var column in this) {
-      list.add(column.unqualified);
-    }
-
-    return list;
-  }
-
-  @override
-  SqlColumnListImpl createClone(bool freeze) =>
-      new SqlColumnListImpl.cloneFrom(this, freeze);
-}
-
 abstract class SqlSchemaImpl extends sql.CustomSqlNodeBase
     implements SqlSchema, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final String name;
@@ -276,39 +154,20 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   }
 
   @override
-  SqlColumnList get columns {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var name in columnNames) {
-      list.add(column(name));
-    }
-
-    return list;
-  }
+  SqlColumnList get columns => new DelegatingSqlColumnList(columnNames
+      .map((columnName) => column(columnName))
+      .toList(growable: false));
 
   @override
-  SqlColumnList get pkColumns {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var name in primaryKeyNames) {
-      list.add(column(name));
-    }
-
-    return list;
-  }
+  SqlColumnList get pkColumns => new DelegatingSqlColumnList(columnNames
+      .map((primaryKeyName) => column(primaryKeyName))
+      .toList(growable: false));
 
   @override
-  SqlColumnList get detailColumns {
-    SqlColumnList list = new SqlColumnListImpl();
-
-    for (var name in columnNames) {
-      if (!primaryKeyNames.contains(name)) {
-        list.add(column(name));
-      }
-    }
-
-    return list;
-  }
+  SqlColumnList get detailColumns => new DelegatingSqlColumnList(columnNames
+      .where((columnName) => !primaryKeyNames.contains(columnName))
+      .map((detailName) => column(detailName))
+      .toList(growable: false));
 
   @override
   sql.SqlNode get as =>
@@ -440,4 +299,177 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
 
   @override
   String toString() => qualifiedName;
+}
+
+class DelegatingSqlColumnIterable extends sql
+    .CustomSqlNodeIterableBase<SqlColumn> implements SqlColumnIterable {
+  const DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
+
+  @override
+  bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
+      base is DelegatingSqlColumnIterable;
+
+  @override
+  bool isAlreadyWrappedList(Iterable<SqlColumn> base) =>
+      base is DelegatingSqlColumnList;
+
+  @override
+  SqlColumnIterable createIterable(Iterable<SqlColumn> base) =>
+      new DelegatingSqlColumnIterable(base);
+
+  @override
+  SqlColumnList createList(List<SqlColumn> base) =>
+      new DelegatingSqlColumnList(base);
+
+  @override
+  SqlColumnList get autoAlias => new DelegatingSqlColumnList(
+      map((column) => column.autoAlias).toList(growable: false));
+
+  @override
+  sql.SqlNodeList get as =>
+      new sql.CustomSqlNodeList.from(map((column) => column.as));
+
+  @override
+  sql.SqlNodeList get equalParameter =>
+      new sql.CustomSqlNodeList.from(map((column) => column.equalParameter));
+
+  @override
+  SqlColumnList exclude(SqlColumn column0,
+      [SqlColumn column1,
+      SqlColumn column2,
+      SqlColumn column3,
+      SqlColumn column4,
+      SqlColumn column5,
+      SqlColumn column6,
+      SqlColumn column7,
+      SqlColumn column8,
+      SqlColumn column9]) {
+    var excludedNodes = sql.normalize(column0, column1, column2, column3,
+        column4, column5, column6, column7, column8, column9);
+
+    var list = [];
+
+    for (var node in this) {
+      bool exclude = false;
+      for (var excludeNode in excludedNodes) {
+        if (node.name == excludeNode.name &&
+            node.table.name == excludeNode.table.name) {
+          exclude = true;
+          break;
+        }
+      }
+      if (!exclude) {
+        list.add(node);
+      }
+    }
+
+    return new DelegatingSqlColumnList(list);
+  }
+
+  @override
+  sql.SqlNodeList get parameter =>
+      new sql.CustomSqlNodeList.from(map((column) => column.parameter));
+
+  @override
+  SqlColumnList postAlias(String postfix) => new DelegatingSqlColumnList(
+      map((column) => column.postAlias(postfix)).toList(growable: false));
+
+  @override
+  SqlColumnList preAlias(String prefix) => new DelegatingSqlColumnList(
+      map((column) => column.preAlias(prefix)).toList(growable: false));
+
+  @override
+  sql.SqlNodeList get unqualified =>
+      new sql.CustomSqlNodeList.from(map((column) => column.unqualified));
+}
+
+class DelegatingSqlColumnList extends sql.CustomSqlNodeListBase<SqlColumn>
+    implements SqlColumnList {
+  const DelegatingSqlColumnList(List<SqlColumn> base) : super(base);
+
+  DelegatingSqlColumnList.cloneFrom(DelegatingSqlColumnList target, bool freeze)
+      : super.cloneFrom(target, freeze);
+
+  @override
+  bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
+      base is DelegatingSqlColumnIterable;
+
+  @override
+  bool isAlreadyWrappedList(Iterable<SqlColumn> base) =>
+      base is DelegatingSqlColumnList;
+
+  @override
+  SqlColumnIterable createIterable(Iterable<SqlColumn> base) =>
+      new DelegatingSqlColumnIterable(base);
+
+  @override
+  SqlColumnList createList(List<SqlColumn> base) =>
+      new DelegatingSqlColumnList(base);
+
+  @override
+  DelegatingSqlColumnList createClone(bool freeze) =>
+      new DelegatingSqlColumnList.cloneFrom(this, freeze);
+
+  // TODO copiati da DelegatingSqlColumnIterable: meglio utilizzare un mixin
+
+  @override
+  SqlColumnList get autoAlias => new DelegatingSqlColumnList(
+      map((column) => column.autoAlias).toList(growable: false));
+
+  @override
+  sql.SqlNodeList get as =>
+      new sql.CustomSqlNodeList.from(map((column) => column.as));
+
+  @override
+  sql.SqlNodeList get equalParameter =>
+      new sql.CustomSqlNodeList.from(map((column) => column.equalParameter));
+
+  @override
+  SqlColumnList exclude(SqlColumn column0,
+      [SqlColumn column1,
+      SqlColumn column2,
+      SqlColumn column3,
+      SqlColumn column4,
+      SqlColumn column5,
+      SqlColumn column6,
+      SqlColumn column7,
+      SqlColumn column8,
+      SqlColumn column9]) {
+    var excludedNodes = sql.normalize(column0, column1, column2, column3,
+        column4, column5, column6, column7, column8, column9);
+
+    var list = [];
+
+    for (var node in this) {
+      bool exclude = false;
+      for (var excludeNode in excludedNodes) {
+        if (node.name == excludeNode.name &&
+            node.table.name == excludeNode.table.name) {
+          exclude = true;
+          break;
+        }
+      }
+      if (!exclude) {
+        list.add(node);
+      }
+    }
+
+    return new DelegatingSqlColumnList(list);
+  }
+
+  @override
+  sql.SqlNodeList get parameter =>
+      new sql.CustomSqlNodeList.from(map((column) => column.parameter));
+
+  @override
+  SqlColumnList postAlias(String postfix) => new DelegatingSqlColumnList(
+      map((column) => column.postAlias(postfix)).toList(growable: false));
+
+  @override
+  SqlColumnList preAlias(String prefix) => new DelegatingSqlColumnList(
+      map((column) => column.preAlias(prefix)).toList(growable: false));
+
+  @override
+  sql.SqlNodeList get unqualified =>
+      new sql.CustomSqlNodeList.from(map((column) => column.unqualified));
 }

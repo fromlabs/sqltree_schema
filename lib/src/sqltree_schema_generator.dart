@@ -77,7 +77,6 @@ class SchemaGenerator {
 library $libraryName;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
-
 """);
   }
 
@@ -86,6 +85,7 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
     var schemaImpl = "_${schemaClass}Impl";
 
     // FIELD
+    buffer.writeln();
     buffer.write("""
 final $schemaClass DEFAULT_SCHEMA = createSchema("");
 """);
@@ -118,6 +118,7 @@ abstract class $schemaClass implements SqlSchema {
     buffer.writeln();
 
     // IMPLEMENTATION
+    buffer.writeln();
     buffer.write("""
 class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
   $schemaImpl(String name) : super(name);
@@ -181,6 +182,7 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
     var tableImpl = "_${tableClass}Impl";
 
     // INTERFACE
+    buffer.writeln();
     buffer.write("""
 abstract class $tableClass implements SqlTable {
 """);
@@ -190,16 +192,15 @@ abstract class $tableClass implements SqlTable {
   SqlColumn get ${column.name.toUpperCase()};
 """);
     }
-    buffer.writeln();
 
+    buffer.writeln();
     buffer.write("""
   $tableClass alias(String alias);
 }
 """);
 
-    buffer.writeln();
-
     // IMPLEMENTATION
+    buffer.writeln();
     buffer.write("""
 class $tableImpl extends SqlTableImpl implements $tableClass {
   static final Set<String> _pkNames = new Set.from([${table.primaryKeys.map((pk) => "\"$pk\"").join(", ")}]);
