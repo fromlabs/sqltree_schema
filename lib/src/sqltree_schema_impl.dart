@@ -301,96 +301,29 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   String toString() => qualifiedName;
 }
 
-class DelegatingSqlColumnIterable extends sql
-    .CustomSqlNodeIterableBase<SqlColumn> implements SqlColumnIterable {
-  const DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
-
-  @override
-  bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
-      base is DelegatingSqlColumnIterable;
-
-  @override
-  bool isAlreadyWrappedList(Iterable<SqlColumn> base) =>
-      base is DelegatingSqlColumnList;
-
-  @override
-  SqlColumnIterable createIterable(Iterable<SqlColumn> base) =>
-      new DelegatingSqlColumnIterable(base);
-
-  @override
-  SqlColumnList createList(List<SqlColumn> base) =>
-      new DelegatingSqlColumnList(base);
-
-  @override
-  SqlColumnList get autoAlias => new DelegatingSqlColumnList(
-      map((column) => column.autoAlias).toList(growable: false));
-
-  @override
-  sql.SqlNodeList get as =>
-      new sql.CustomSqlNodeList.from(map((column) => column.as));
-
-  @override
-  sql.SqlNodeList get equalParameter =>
-      new sql.CustomSqlNodeList.from(map((column) => column.equalParameter));
-
-  @override
-  SqlColumnList exclude(SqlColumn column0,
-      [SqlColumn column1,
-      SqlColumn column2,
-      SqlColumn column3,
-      SqlColumn column4,
-      SqlColumn column5,
-      SqlColumn column6,
-      SqlColumn column7,
-      SqlColumn column8,
-      SqlColumn column9]) {
-    var excludedNodes = sql.normalize(column0, column1, column2, column3,
-        column4, column5, column6, column7, column8, column9);
-
-    var list = [];
-
-    for (var node in this) {
-      bool exclude = false;
-      for (var excludeNode in excludedNodes) {
-        if (node.name == excludeNode.name &&
-            node.table.name == excludeNode.table.name) {
-          exclude = true;
-          break;
-        }
-      }
-      if (!exclude) {
-        list.add(node);
-      }
-    }
-
-    return new DelegatingSqlColumnList(list);
-  }
-
-  @override
-  sql.SqlNodeList get parameter =>
-      new sql.CustomSqlNodeList.from(map((column) => column.parameter));
-
-  @override
-  SqlColumnList postAlias(String postfix) => new DelegatingSqlColumnList(
-      map((column) => column.postAlias(postfix)).toList(growable: false));
-
-  @override
-  SqlColumnList preAlias(String prefix) => new DelegatingSqlColumnList(
-      map((column) => column.preAlias(prefix)).toList(growable: false));
-
-  @override
-  sql.SqlNodeList get unqualified =>
-      new sql.CustomSqlNodeList.from(map((column) => column.unqualified));
+class DelegatingSqlColumnIterable
+    extends sql.CustomSqlNodeIterableBase<SqlColumn>
+    with DelegatingSqlColumnIterableMixin
+    implements SqlColumnIterable {
+  DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
 }
 
 class DelegatingSqlColumnList extends sql.CustomSqlNodeListBase<SqlColumn>
+    with DelegatingSqlColumnIterableMixin
     implements SqlColumnList {
-  const DelegatingSqlColumnList(List<SqlColumn> base) : super(base);
+  DelegatingSqlColumnList(List<SqlColumn> base) : super(base);
 
   DelegatingSqlColumnList.cloneFrom(DelegatingSqlColumnList target, bool freeze)
       : super.cloneFrom(target, freeze);
 
   @override
+  DelegatingSqlColumnList createClone(bool freeze) =>
+      new DelegatingSqlColumnList.cloneFrom(this, freeze);
+}
+
+abstract class DelegatingSqlColumnIterableMixin
+    implements SqlColumnIterable, sql.CustomSqlNodeIterableBase<SqlColumn> {
+  @override
   bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
       base is DelegatingSqlColumnIterable;
 
@@ -405,12 +338,6 @@ class DelegatingSqlColumnList extends sql.CustomSqlNodeListBase<SqlColumn>
   @override
   SqlColumnList createList(List<SqlColumn> base) =>
       new DelegatingSqlColumnList(base);
-
-  @override
-  DelegatingSqlColumnList createClone(bool freeze) =>
-      new DelegatingSqlColumnList.cloneFrom(this, freeze);
-
-  // TODO copiati da DelegatingSqlColumnIterable: meglio utilizzare un mixin
 
   @override
   SqlColumnList get autoAlias => new DelegatingSqlColumnList(
