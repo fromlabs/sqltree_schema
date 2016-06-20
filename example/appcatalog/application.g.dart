@@ -2,8 +2,8 @@ library appcatalog.schema.application;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
-import "localization_support.dart";
-import "localization_support_impl.dart";
+import "localization/localization_support.dart";
+import "localization/localization_support_impl.dart";
 
 final Application_Schema DEFAULT_SCHEMA = createSchema("");
 
@@ -148,7 +148,7 @@ class _Application_SchemaImpl extends SqlSchemaImpl
   V_ITEM_Table get V_ITEM => table("v_item");
 
   @override
-  SqlLocalizedTableImpl createTable(String name) {
+  SqlTableImpl createTable(String name) {
     switch (name) {
       case "brand":
         return new _BRAND_TableImpl(this);
@@ -271,7 +271,7 @@ class _BRAND_TableImpl extends SqlLocalizedTableImpl implements BRAND_Table {
       new _BRAND_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _BRAND_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -364,7 +364,7 @@ class _C_CATALOG_ITEM_TableImpl extends SqlLocalizedTableImpl
       new _C_CATALOG_ITEM_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _C_CATALOG_ITEM_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -474,7 +474,7 @@ class _CATALOG_TableImpl extends SqlLocalizedTableImpl
       new _CATALOG_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _CATALOG_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -538,7 +538,7 @@ class _CLASSIFICATION_FEATURE_TYPE_TableImpl extends SqlLocalizedTableImpl
       new _CLASSIFICATION_FEATURE_TYPE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _CLASSIFICATION_FEATURE_TYPE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -678,7 +678,7 @@ class _DETAIL_TableImpl extends SqlLocalizedTableImpl implements DETAIL_Table {
       new _DETAIL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _DETAIL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -733,7 +733,7 @@ class _DOMAIN_CURRENCY_TableImpl extends SqlLocalizedTableImpl
       new _DOMAIN_CURRENCY_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _DOMAIN_CURRENCY_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -838,7 +838,7 @@ class _FEATURE_TableImpl extends SqlLocalizedTableImpl
       new _FEATURE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _FEATURE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1007,7 +1007,7 @@ class _FEATURE_TYPE_TableImpl extends SqlLocalizedTableImpl
       new _FEATURE_TYPE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _FEATURE_TYPE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1118,7 +1118,7 @@ class _FEATURE_TYPE_GROUP_TableImpl extends SqlLocalizedTableImpl
       new _FEATURE_TYPE_GROUP_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _FEATURE_TYPE_GROUP_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1174,7 +1174,7 @@ class _FILESYSTEM_TableImpl extends SqlLocalizedTableImpl
       new _FILESYSTEM_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _FILESYSTEM_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1217,7 +1217,7 @@ class _INFO_TableImpl extends SqlLocalizedTableImpl implements INFO_Table {
       new _INFO_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _INFO_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1332,7 +1332,7 @@ class _ITEM_GROUP_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_GROUP_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_GROUP_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1396,7 +1396,7 @@ class _ITEM_GROUP_DETAIL_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_GROUP_DETAIL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_GROUP_DETAIL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1489,7 +1489,7 @@ class _ITEM_GROUP_TYPE_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_GROUP_TYPE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_GROUP_TYPE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1547,7 +1547,7 @@ class _ITEM_GROUP_URL_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_GROUP_URL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_GROUP_URL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1618,7 +1618,7 @@ class _ITEM_PACKAGE_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_PACKAGE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_PACKAGE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1708,7 +1708,7 @@ class _ITEM_PACKAGE_PRICE_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_PACKAGE_PRICE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_PACKAGE_PRICE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1765,7 +1765,7 @@ class _ITEM_SET_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_SET_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_SET_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1834,7 +1834,7 @@ class _ITEM_SET_DETAIL_TableImpl extends SqlLocalizedTableImpl
       new _ITEM_SET_DETAIL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _ITEM_SET_DETAIL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -1970,7 +1970,7 @@ class _MEASURE_TableImpl extends SqlLocalizedTableImpl
       new _MEASURE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _MEASURE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2277,7 +2277,7 @@ class _NODE_TableImpl extends SqlLocalizedTableImpl implements NODE_Table {
       new _NODE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _NODE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2341,7 +2341,7 @@ class _NODE_DETAIL_TableImpl extends SqlLocalizedTableImpl
       new _NODE_DETAIL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _NODE_DETAIL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2399,7 +2399,7 @@ class _NODE_FEATURE_TableImpl extends SqlLocalizedTableImpl
       new _NODE_FEATURE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _NODE_FEATURE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2487,7 +2487,7 @@ class _NODE_TYPE_TableImpl extends SqlLocalizedTableImpl
       new _NODE_TYPE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _NODE_TYPE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2548,7 +2548,7 @@ class _NODE_URL_TableImpl extends SqlLocalizedTableImpl
       new _NODE_URL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _NODE_URL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2653,7 +2653,7 @@ class _PACKAGE_TableImpl extends SqlLocalizedTableImpl
       new _PACKAGE_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _PACKAGE_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2754,7 +2754,7 @@ class _PRICE_LIST_TableImpl extends SqlLocalizedTableImpl
       new _PRICE_LIST_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _PRICE_LIST_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2810,7 +2810,7 @@ class _PROFILE_CATALOG_TableImpl extends SqlLocalizedTableImpl
       new _PROFILE_CATALOG_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _PROFILE_CATALOG_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -2963,7 +2963,7 @@ class _URL_TableImpl extends SqlLocalizedTableImpl implements URL_Table {
       new _URL_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _URL_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -3244,7 +3244,7 @@ class _V_CLASSIFICATION_TableImpl extends SqlLocalizedTableImpl
       new _V_CLASSIFICATION_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _V_CLASSIFICATION_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */
@@ -3525,7 +3525,7 @@ class _V_ITEM_TableImpl extends SqlLocalizedTableImpl implements V_ITEM_Table {
       new _V_ITEM_TableImpl.cloneFrom(this, freeze);
 
   @override
-  SqlLocalizedTable createTableAlias(String alias) =>
+  SqlTable createTableAlias(String alias) =>
       new _V_ITEM_TableImpl.aliased(alias, this);
 
   /* LOCALIZED SUPPORT */

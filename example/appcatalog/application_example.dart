@@ -2,7 +2,6 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 import 'package:sqltree/sqltree.dart' as sql;
-import "localization_support.dart";
 
 import 'application.g.dart';
 

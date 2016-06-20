@@ -72,12 +72,14 @@ class SchemaGenerator {
   }
 
   void createLibrary(StringBuffer buffer) {
-    buffer.write("""$copyrightText
+    buffer.writeln("""$copyrightText
 
 library $libraryName;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
 """);
+
+    createLibraryExtension(buffer);
   }
 
   void createSchema(StringBuffer buffer) {
@@ -86,19 +88,18 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
     // FIELD
     buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
 final $schemaClass DEFAULT_SCHEMA = createSchema("");
 """);
 
-    buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
 $schemaClass createSchema(String name) =>
     registerSharedSchema(new $schemaImpl(name));
 """);
 
     // INTERFACE
     buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
 abstract class $schemaClass implements SqlSchema {
 """);
 
@@ -106,20 +107,18 @@ abstract class $schemaClass implements SqlSchema {
       var tableName = table.name.toUpperCase();
       var tableClass = "${tableName}_Table";
 
-      buffer.write("""
+      buffer.writeln("""
   $tableClass get $tableName;
 """);
     }
 
-    buffer.write("""
+    buffer.writeln("""
 }
 """);
 
-    buffer.writeln();
-
     // IMPLEMENTATION
     buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
 class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
   $schemaImpl(String name) : super(name);
 
@@ -127,19 +126,17 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
       : super.cloneFrom(target, freeze);
 """);
 
-    buffer.writeln();
     for (var table in tables) {
       var tableName = table.name.toUpperCase();
       var tableClass = "${tableName}_Table";
 
-      buffer.write("""
+      buffer.writeln("""
   @override
   $tableClass get $tableName => table("${table.name}");
 """);
-      buffer.writeln();
     }
 
-    buffer.write("""
+    buffer.writeln("""
   @override
   SqlTableImpl createTable(String name) {
     switch (name) {
@@ -150,21 +147,20 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
       var tableClass = "${tableName}_Table";
       var tableImpl = "_${tableClass}Impl";
 
-      buffer.write("""
+      buffer.writeln("""
       case "${table.name}":
         return new $tableImpl(this);
 """);
     }
 
-    buffer.write("""
+    buffer.writeln("""
       default:
         throw new UnsupportedError("Table not exist \$name");
     }
   }
 """);
 
-    buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
   @override
   $schemaImpl createClone(bool freeze) =>
       new $schemaImpl.cloneFrom(this, freeze);
@@ -183,26 +179,30 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
 
     // INTERFACE
     buffer.writeln();
-    buffer.write("""
-abstract class $tableClass implements SqlTable {
+    buffer.writeln("""
+abstract class $tableClass implements ${getBaseTableClass(table)} {
 """);
 
     for (var column in table.columns) {
-      buffer.write("""
+      buffer.writeln("""
   SqlColumn get ${column.name.toUpperCase()};
 """);
     }
 
-    buffer.writeln();
-    buffer.write("""
+    buffer.writeln("""
   $tableClass alias(String alias);
+""");
+
+    createTableClassExtension(table, buffer);
+
+    buffer.writeln("""
 }
 """);
 
     // IMPLEMENTATION
     buffer.writeln();
-    buffer.write("""
-class $tableImpl extends SqlTableImpl implements $tableClass {
+    buffer.writeln("""
+class $tableImpl extends ${getBaseTableImpl(table)} implements $tableClass {
   static final Set<String> _pkNames = new Set.from([${table.primaryKeys.map((pk) => "\"$pk\"").join(", ")}]);
   static final Set<String> _columnNames = new Set.from([${table.columns.map((col) => "\"${col.name}\"").join(", ")}]);
 
@@ -215,16 +215,14 @@ class $tableImpl extends SqlTableImpl implements $tableClass {
       : super.cloneFrom(target, freeze);
 """);
 
-    buffer.writeln();
     for (var column in table.columns) {
-      buffer.write("""
+      buffer.writeln("""
   @override
   SqlColumn get ${column.name.toUpperCase()} => column("${column.name}");
 """);
-      buffer.writeln();
     }
 
-    buffer.write("""
+    buffer.writeln("""
   @override
   Set<String> get primaryKeyNames => _pkNames;
 
@@ -238,7 +236,22 @@ class $tableImpl extends SqlTableImpl implements $tableClass {
   @override
   SqlTable createTableAlias(String alias) =>
       new $tableImpl.aliased(alias, this);
+""");
+
+    createTableImplExtension(table, buffer);
+
+    buffer.writeln("""
 }
 """);
   }
+
+  String getBaseTableClass(TableDescriptor table) => "SqlTable";
+
+  String getBaseTableImpl(TableDescriptor table) => "SqlTableImpl";
+
+  void createLibraryExtension(StringBuffer buffer) {}
+
+  void createTableClassExtension(TableDescriptor table, StringBuffer buffer) {}
+
+  void createTableImplExtension(TableDescriptor table, StringBuffer buffer) {}
 }
