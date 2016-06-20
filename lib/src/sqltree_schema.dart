@@ -3,6 +3,8 @@
 
 import "package:sqltree/sqltree.dart";
 
+import "sqltree_schema_impl.dart";
+
 final ExtTypes types = new ExtTypes();
 
 class ExtTypes {
@@ -17,9 +19,9 @@ class ExtTypes {
   }
 
   void _registerTypes(ExtTypes types) {
-    registerNodeType(types.SCHEMA);
-    registerNodeType(types.TABLE);
-    registerNodeType(types.COLUMN);
+    registerNodeType(types.SCHEMA, (node) => node is SqlSchemaImpl);
+    registerNodeType(types.TABLE, (node) => node is SqlTableImpl);
+    registerNodeType(types.COLUMN, (node) => node is SqlColumnImpl);
   }
 }
 
@@ -65,11 +67,13 @@ abstract class SqlTable implements SqlNode {
 
   SqlTable alias(String alias);
 
-  SqlColumnList get columns;
+  SqlColumn column(String name);
 
-  SqlColumnList get pkColumns;
+  SqlColumnList<SqlColumn> get columns;
 
-  SqlColumnList get detailColumns;
+  SqlColumnList<SqlColumn> get pkColumns;
+
+  SqlColumnList<SqlColumn> get detailColumns;
 
   SqlNode get as;
 
@@ -112,23 +116,24 @@ abstract class SqlColumn implements SqlNode {
   SqlColumn clone({bool freeze});
 }
 
-abstract class SqlColumnIterable implements SqlNodeIterable<SqlColumn> {
-  SqlColumnList exclude(SqlColumn column0,
-      [SqlColumn column1,
-      SqlColumn column2,
-      SqlColumn column3,
-      SqlColumn column4,
-      SqlColumn column5,
-      SqlColumn column6,
-      SqlColumn column7,
-      SqlColumn column8,
-      SqlColumn column9]);
+abstract class SqlColumnIterable<T extends SqlColumn>
+    implements SqlNodeIterable<T> {
+  SqlColumnList exclude(T column0,
+      [T column1,
+      T column2,
+      T column3,
+      T column4,
+      T column5,
+      T column6,
+      T column7,
+      T column8,
+      T column9]);
 
-  SqlColumnIterable get autoAlias;
+  SqlColumnIterable<T> get autoAlias;
 
-  SqlColumnIterable preAlias(String prefix);
+  SqlColumnIterable<T> preAlias(String prefix);
 
-  SqlColumnIterable postAlias(String postfix);
+  SqlColumnIterable<T> postAlias(String postfix);
 
   SqlNodeIterable<SqlNode> get as;
 
@@ -140,38 +145,38 @@ abstract class SqlColumnIterable implements SqlNodeIterable<SqlColumn> {
 
   /* FROM SQLNODEITERABLE */
 
-  SqlColumnIterable whereReference(String reference);
+  SqlColumnIterable<T> whereReference(String reference);
 
-  SqlColumnIterable whereDeep(bool test(SqlColumn element));
+  SqlColumnIterable<T> whereDeep(bool test(T element));
+
+  SqlColumnIterable<T> expandNodes(Iterable<T> f(T element));
+
+  SqlColumnIterable<T> mapNodes(T f(T element));
 
   /* FROM ITERABLE */
 
-  SqlColumnIterable expand(Iterable f(SqlColumn element));
+  SqlColumnIterable<T> skip(int n);
 
-  SqlColumnIterable map(f(SqlColumn element));
+  SqlColumnIterable<T> skipWhile(bool test(T value));
 
-  SqlColumnIterable skip(int n);
+  SqlColumnIterable<T> take(int n);
 
-  SqlColumnIterable skipWhile(bool test(SqlColumn value));
+  SqlColumnIterable<T> takeWhile(bool test(T value));
 
-  SqlColumnIterable take(int n);
+  SqlColumnList<T> toList({bool growable: true});
 
-  SqlColumnIterable takeWhile(bool test(SqlColumn value));
-
-  SqlColumnList toList({bool growable: true});
-
-  SqlColumnIterable where(bool test(SqlColumn element));
+  SqlColumnIterable<T> where(bool test(T element));
 }
 
-abstract class SqlColumnList
-    implements SqlColumnIterable, SqlNodeList<SqlColumn> {
-  SqlColumnList clone({bool freeze});
+abstract class SqlColumnList<T extends SqlColumn>
+    implements SqlColumnIterable<T>, SqlNodeList<T> {
+  SqlColumnList<T> clone({bool freeze});
 
   /* FROM LIST */
 
-  SqlColumnIterable getRange(int start, int end);
+  SqlColumnIterable<T> getRange(int start, int end);
 
-  SqlColumnIterable get reversed;
+  SqlColumnIterable<T> get reversed;
 
-  SqlColumnList sublist(int start, [int end]);
+  SqlColumnList<T> sublist(int start, [int end]);
 }

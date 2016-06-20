@@ -7,7 +7,7 @@ import "sqltree_schema.dart";
 registerSharedSchema(SqlSchema schema) =>
     sql.registerNode(schema).clone(freeze: true).._share();
 
-abstract class SqlSchemaImpl extends sql.CustomSqlNodeBase
+abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
     implements SqlSchema, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final String name;
 
@@ -63,7 +63,7 @@ abstract class SqlSchemaImpl extends sql.CustomSqlNodeBase
   String toString() => isDefault ? "DEFAULT_SCHEMA" : name;
 }
 
-abstract class SqlTableImpl extends sql.CustomSqlNodeBase
+abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
     implements SqlTable, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final String name;
 
@@ -135,10 +135,9 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
       bool isPrimaryKey = primaryKeyNames.contains(name);
       if (target != null) {
         var targetColumn = target.column(name);
-        column =
-            new SqlColumnImpl.aliased(name, targetColumn, isPrimaryKey, this);
+        column = createColumnAliased(name, targetColumn, isPrimaryKey);
       } else {
-        column = new SqlColumnImpl(name, isPrimaryKey, this);
+        column = createColumn(name, isPrimaryKey);
       }
       column = nodeManager.registerNode(column);
 
@@ -153,13 +152,20 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
     return column;
   }
 
+  SqlColumn createColumn(String name, bool isPrimaryKey) =>
+      new SqlColumnImpl(name, isPrimaryKey, this);
+
+  SqlColumn createColumnAliased(
+          String name, SqlColumn targetColumn, bool isPrimaryKey) =>
+      new SqlColumnImpl.aliased(name, targetColumn, isPrimaryKey, this);
+
   @override
   SqlColumnList get columns => new DelegatingSqlColumnList(columnNames
       .map((columnName) => column(columnName))
       .toList(growable: false));
 
   @override
-  SqlColumnList get pkColumns => new DelegatingSqlColumnList(columnNames
+  SqlColumnList get pkColumns => new DelegatingSqlColumnList(primaryKeyNames
       .map((primaryKeyName) => column(primaryKeyName))
       .toList(growable: false));
 
@@ -174,7 +180,7 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
       this.isAliased ? sql.as(target, name) : sql.as(this, name);
 
   @override
-  sql.SqlNode get unqualified => sql.normalize(name).single;
+  sql.SqlNode get unqualified => sql.node(name).single;
 
   Set<String> get columnNames;
 
@@ -195,7 +201,7 @@ abstract class SqlTableImpl extends sql.CustomSqlNodeBase
   String toString() => name;
 }
 
-class SqlColumnImpl extends sql.CustomSqlNodeBase
+class SqlColumnImpl extends sql.ExtensionSqlNodeBase
     implements SqlColumn, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
   final SqlTable table;
 
@@ -282,7 +288,7 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
   SqlColumn preAlias(String prefix) => this.alias("$prefix$name");
 
   @override
-  sql.SqlNode get unqualified => sql.normalize(name).single;
+  sql.SqlNode get unqualified => sql.node(name).single;
 
   @override
   SqlColumnImpl createClone(bool freeze) =>
@@ -302,13 +308,13 @@ class SqlColumnImpl extends sql.CustomSqlNodeBase
 }
 
 class DelegatingSqlColumnIterable
-    extends sql.CustomSqlNodeIterableBase<SqlColumn>
+    extends sql.ExtensionSqlNodeIterableBase<SqlColumn>
     with DelegatingSqlColumnIterableMixin
     implements SqlColumnIterable {
   DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
 }
 
-class DelegatingSqlColumnList extends sql.CustomSqlNodeListBase<SqlColumn>
+class DelegatingSqlColumnList extends sql.ExtensionSqlNodeListBase<SqlColumn>
     with DelegatingSqlColumnIterableMixin
     implements SqlColumnList {
   DelegatingSqlColumnList(List<SqlColumn> base) : super(base);
@@ -322,7 +328,7 @@ class DelegatingSqlColumnList extends sql.CustomSqlNodeListBase<SqlColumn>
 }
 
 abstract class DelegatingSqlColumnIterableMixin
-    implements SqlColumnIterable, sql.CustomSqlNodeIterableBase<SqlColumn> {
+    implements SqlColumnIterable, sql.ExtensionSqlNodeIterableBase<SqlColumn> {
   @override
   bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
       base is DelegatingSqlColumnIterable;
@@ -345,11 +351,11 @@ abstract class DelegatingSqlColumnIterableMixin
 
   @override
   sql.SqlNodeList get as =>
-      new sql.CustomSqlNodeList.from(map((column) => column.as));
+      new sql.ExtensionSqlNodeList.from(map((column) => column.as));
 
   @override
   sql.SqlNodeList get equalParameter =>
-      new sql.CustomSqlNodeList.from(map((column) => column.equalParameter));
+      new sql.ExtensionSqlNodeList.from(map((column) => column.equalParameter));
 
   @override
   SqlColumnList exclude(SqlColumn column0,
@@ -362,8 +368,8 @@ abstract class DelegatingSqlColumnIterableMixin
       SqlColumn column7,
       SqlColumn column8,
       SqlColumn column9]) {
-    var excludedNodes = sql.normalize(column0, column1, column2, column3,
-        column4, column5, column6, column7, column8, column9);
+    var excludedNodes = sql.node(column0, column1, column2, column3, column4,
+        column5, column6, column7, column8, column9);
 
     var list = [];
 
@@ -386,7 +392,7 @@ abstract class DelegatingSqlColumnIterableMixin
 
   @override
   sql.SqlNodeList get parameter =>
-      new sql.CustomSqlNodeList.from(map((column) => column.parameter));
+      new sql.ExtensionSqlNodeList.from(map((column) => column.parameter));
 
   @override
   SqlColumnList postAlias(String postfix) => new DelegatingSqlColumnList(
@@ -398,5 +404,5 @@ abstract class DelegatingSqlColumnIterableMixin
 
   @override
   sql.SqlNodeList get unqualified =>
-      new sql.CustomSqlNodeList.from(map((column) => column.unqualified));
+      new sql.ExtensionSqlNodeList.from(map((column) => column.unqualified));
 }
