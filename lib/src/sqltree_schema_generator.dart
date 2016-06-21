@@ -15,7 +15,7 @@ class SchemaDescriptor {
 class TableDescriptor {
   final String name;
 
-  final List<String> primaryKeys = [];
+  final Set<String> primaryKeys = new Set();
 
   final List<ColumnDescriptor> columns = [];
 
