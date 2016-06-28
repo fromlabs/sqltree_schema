@@ -162,6 +162,9 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
 
     buffer.writeln("""
   @override
+  $schemaClass clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   $schemaImpl createClone(bool freeze) =>
       new $schemaImpl.cloneFrom(this, freeze);
 }
@@ -228,6 +231,12 @@ class $tableImpl extends ${getBaseTableImpl(table)} implements $tableClass {
 
   @override
   Set<String> get columnNames => _columnNames;
+
+  @override
+  $tableClass alias(String alias) => super.alias(alias);
+
+  @override
+  $tableClass clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   $tableImpl createClone(bool freeze) =>

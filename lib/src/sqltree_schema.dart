@@ -49,7 +49,7 @@ abstract class SqlSchema implements SqlNode {
 
   SqlTable table(String name);
 
-  SqlTable clone({bool freeze});
+  SqlSchema clone({bool freeze});
 }
 
 abstract class SqlTable implements SqlNode {
@@ -179,4 +179,28 @@ abstract class SqlColumnList<T extends SqlColumn>
   SqlColumnIterable<T> get reversed;
 
   SqlColumnList<T> sublist(int start, [int end]);
+
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable<T> whereReference(String reference);
+
+  SqlColumnIterable<T> whereDeep(bool test(T element));
+
+  SqlColumnIterable<T> expandNodes(Iterable<T> f(T element));
+
+  SqlColumnIterable<T> mapNodes(T f(T element));
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable<T> skip(int n);
+
+  SqlColumnIterable<T> skipWhile(bool test(T value));
+
+  SqlColumnIterable<T> take(int n);
+
+  SqlColumnIterable<T> takeWhile(bool test(T value));
+
+  SqlColumnList<T> toList({bool growable: true});
+
+  SqlColumnIterable<T> where(bool test(T element));
 }

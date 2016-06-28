@@ -12,7 +12,6 @@ final USERSDB_Schema schema = DEFAULT_SCHEMA;
 final USERSDB_Schema OTHER_SCHEMA = createSchema("OTHER");
 
 main() {
-
   var select2 = sql.select(schema.USERS.ID)
     ..from(sql.setReference("USERS", schema.USERS));
 
@@ -51,8 +50,6 @@ main() {
   print(sql.prettify(sql.format(sql.select(
       schema.USERS.columns.exclude(schema.USERS.ID, schema.USERS.GROUP_ID)))));
 
-
-
   print(sql.prettify(sql.format(sql.select(
       schema.USERS.ID,
       schema.USERS.ID.as,
@@ -87,13 +84,6 @@ main() {
 
   var i = 0;
   print(select.selectClause.children[i].isFreezed);
-  print(select.selectClause.children[i++].main.isFreezed);
-  print(select.selectClause.children[i].target.isFreezed);
-  print(select.selectClause.children[i++].main.isFreezed);
-  print(select.selectClause.children[i].target.isFreezed);
-  print(select.selectClause.children[i++].main.isFreezed);
-  print(select.selectClause.children[i].target.isFreezed);
-  print(select.selectClause.children[i++].main.isFreezed);
 
   print(sql.prettify(sql.format(schema.USERS.alias("MY_USERS").as)));
   print(sql.prettify(sql.format(schema.USERS.ID.alias("MY_ID").as)));
@@ -119,7 +109,8 @@ main() {
   print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID));
   print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.as));
   print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID")));
-  print(sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID").as));
+  print(
+      sql.format(DEFAULT_SCHEMA.USERS.alias("MY_USERS").ID.alias("MY_ID").as));
   print(sql.format(OTHER_SCHEMA.USERS.ID));
   print(sql.format(OTHER_SCHEMA.USERS.ID.as));
   print(sql.format(OTHER_SCHEMA.USERS.ID.alias("MY_ID")));

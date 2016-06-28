@@ -40,6 +40,9 @@ class _USERSDB_SchemaImpl extends SqlSchemaImpl implements USERSDB_Schema {
   }
 
   @override
+  USERSDB_Schema clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   _USERSDB_SchemaImpl createClone(bool freeze) =>
       new _USERSDB_SchemaImpl.cloneFrom(this, freeze);
 }
@@ -139,6 +142,12 @@ class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
 
   @override
   Set<String> get columnNames => _columnNames;
+
+  @override
+  USERS_Table alias(String alias) => super.alias(alias);
+
+  @override
+  USERS_Table clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   _USERS_TableImpl createClone(bool freeze) =>

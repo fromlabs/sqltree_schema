@@ -60,6 +60,9 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
+  SqlSchema clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   String toString() => isDefault ? "DEFAULT_SCHEMA" : name;
 }
 
@@ -198,6 +201,9 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
+  SqlTable clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   String toString() => name;
 }
 
@@ -304,6 +310,9 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
+  SqlColumn clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   String toString() => qualifiedName;
 }
 
@@ -312,6 +321,39 @@ class DelegatingSqlColumnIterable
     with DelegatingSqlColumnIterableMixin
     implements SqlColumnIterable {
   DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
+
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable<SqlColumn> whereReference(String reference) =>
+      super.whereReference(reference);
+
+  SqlColumnIterable<SqlColumn> whereDeep(bool test(SqlColumn element)) =>
+      super.whereDeep(test);
+
+  SqlColumnIterable<SqlColumn> expandNodes(
+          Iterable<SqlColumn> f(SqlColumn element)) =>
+      super.expandNodes(f);
+
+  SqlColumnIterable<SqlColumn> mapNodes(SqlColumn f(SqlColumn element)) =>
+      super.mapNodes(f);
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable<SqlColumn> skip(int n) => super.skip(n);
+
+  SqlColumnIterable<SqlColumn> skipWhile(bool test(SqlColumn value)) =>
+      super.skipWhile(test);
+
+  SqlColumnIterable<SqlColumn> take(int n) => super.take(n);
+
+  SqlColumnIterable<SqlColumn> takeWhile(bool test(SqlColumn value)) =>
+      super.takeWhile(test);
+
+  SqlColumnList<SqlColumn> toList({bool growable: true}) =>
+      super.toList(growable: growable);
+
+  SqlColumnIterable<SqlColumn> where(bool test(SqlColumn element)) =>
+      super.where(test);
 }
 
 class DelegatingSqlColumnList extends sql.ExtensionSqlNodeListBase<SqlColumn>
@@ -323,8 +365,54 @@ class DelegatingSqlColumnList extends sql.ExtensionSqlNodeListBase<SqlColumn>
       : super.cloneFrom(target, freeze);
 
   @override
+  SqlColumnList clone({bool freeze}) => super.clone(freeze: freeze);
+
+  @override
   DelegatingSqlColumnList createClone(bool freeze) =>
       new DelegatingSqlColumnList.cloneFrom(this, freeze);
+
+  /* FROM LIST */
+
+  SqlColumnIterable<SqlColumn> getRange(int start, int end) =>
+      super.getRange(start, end);
+
+  SqlColumnIterable<SqlColumn> get reversed => super.reversed;
+
+  SqlColumnList<SqlColumn> sublist(int start, [int end]) =>
+      super.sublist(start, end);
+
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable<SqlColumn> whereReference(String reference) =>
+      super.whereReference(reference);
+
+  SqlColumnIterable<SqlColumn> whereDeep(bool test(SqlColumn element)) =>
+      super.whereDeep(test);
+
+  SqlColumnIterable<SqlColumn> expandNodes(
+          Iterable<SqlColumn> f(SqlColumn element)) =>
+      super.expandNodes(f);
+
+  SqlColumnIterable<SqlColumn> mapNodes(SqlColumn f(SqlColumn element)) =>
+      super.mapNodes(f);
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable<SqlColumn> skip(int n) => super.skip(n);
+
+  SqlColumnIterable<SqlColumn> skipWhile(bool test(SqlColumn value)) =>
+      super.skipWhile(test);
+
+  SqlColumnIterable<SqlColumn> take(int n) => super.take(n);
+
+  SqlColumnIterable<SqlColumn> takeWhile(bool test(SqlColumn value)) =>
+      super.takeWhile(test);
+
+  SqlColumnList<SqlColumn> toList({bool growable: true}) =>
+      super.toList(growable: growable);
+
+  SqlColumnIterable<SqlColumn> where(bool test(SqlColumn element)) =>
+      super.where(test);
 }
 
 abstract class DelegatingSqlColumnIterableMixin
@@ -371,11 +459,11 @@ abstract class DelegatingSqlColumnIterableMixin
     var excludedNodes = sql.node(column0, column1, column2, column3, column4,
         column5, column6, column7, column8, column9);
 
-    var list = [];
+    var list = <SqlColumn>[];
 
     for (var node in this) {
       bool exclude = false;
-      for (var excludeNode in excludedNodes) {
+      for (SqlColumn excludeNode in excludedNodes) {
         if (node.name == excludeNode.name &&
             node.table.name == excludeNode.table.name) {
           exclude = true;
