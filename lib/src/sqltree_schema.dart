@@ -71,10 +71,6 @@ abstract class SqlTable implements SqlNode {
 
   SqlColumnList<SqlColumn> get columns;
 
-  SqlColumnList<SqlColumn> get pkColumns;
-
-  SqlColumnList<SqlColumn> get detailColumns;
-
   SqlNode get as;
 
   SqlNode get unqualified;
@@ -118,7 +114,7 @@ abstract class SqlColumn implements SqlNode {
 
 abstract class SqlColumnIterable<T extends SqlColumn>
     implements SqlNodeIterable<T> {
-  SqlColumnList exclude(T column0,
+  SqlColumnIterable<T> exclude(T column0,
       [T column1,
       T column2,
       T column3,
@@ -128,6 +124,10 @@ abstract class SqlColumnIterable<T extends SqlColumn>
       T column7,
       T column8,
       T column9]);
+
+  SqlColumnIterable<T> get pks;
+
+  SqlColumnIterable<T> get details;
 
   SqlColumnIterable<T> get autoAlias;
 

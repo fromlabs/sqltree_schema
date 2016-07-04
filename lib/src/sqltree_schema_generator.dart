@@ -87,10 +87,18 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
     var schemaImpl = "_${schemaClass}Impl";
 
     // FIELD
-    buffer.writeln();
     buffer.writeln("""
-final $schemaClass DEFAULT_SCHEMA = createSchema("");
+final $schemaClass _DEFAULT_SCHEMA = createSchema("");
 """);
+
+    for (var table in tables) {
+      var tableName = table.name.toUpperCase();
+      var tableClass = "${tableName}_Table";
+
+      buffer.writeln("""
+$tableClass get $tableName => _DEFAULT_SCHEMA.$tableName;
+""");
+    }
 
     buffer.writeln("""
 $schemaClass createSchema(String name) =>
@@ -98,7 +106,6 @@ $schemaClass createSchema(String name) =>
 """);
 
     // INTERFACE
-    buffer.writeln();
     buffer.writeln("""
 abstract class $schemaClass implements SqlSchema {
 """);
@@ -117,7 +124,6 @@ abstract class $schemaClass implements SqlSchema {
 """);
 
     // IMPLEMENTATION
-    buffer.writeln();
     buffer.writeln("""
 class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
   $schemaImpl(String name) : super(name);
@@ -162,7 +168,7 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
 
     buffer.writeln("""
   @override
-  $schemaClass clone({bool freeze}) => super.clone(freeze: freeze);
+  $schemaImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   $schemaImpl createClone(bool freeze) =>
@@ -181,7 +187,6 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
     var tableImpl = "_${tableClass}Impl";
 
     // INTERFACE
-    buffer.writeln();
     buffer.writeln("""
 abstract class $tableClass implements ${getBaseTableClass(table)} {
 """);
@@ -203,7 +208,6 @@ abstract class $tableClass implements ${getBaseTableClass(table)} {
 """);
 
     // IMPLEMENTATION
-    buffer.writeln();
     buffer.writeln("""
 class $tableImpl extends ${getBaseTableImpl(table)} implements $tableClass {
   static final Set<String> _pkNames = new Set.from([${table.primaryKeys.map((pk) => "\"$pk\"").join(", ")}]);
@@ -236,7 +240,7 @@ class $tableImpl extends ${getBaseTableImpl(table)} implements $tableClass {
   $tableClass alias(String alias) => super.alias(alias);
 
   @override
-  $tableClass clone({bool freeze}) => super.clone(freeze: freeze);
+  $tableImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   $tableImpl createClone(bool freeze) =>

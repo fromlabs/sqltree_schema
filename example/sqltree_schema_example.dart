@@ -5,11 +5,10 @@ import 'package:sqltree/sqltree.dart' as sql;
 
 import 'package:sqltree_schema/sqltree_schema.dart' as sql;
 
-import 'users_schema.g.dart';
+import 'users_schema.g.dart' as schema;
 
-final USERSDB_Schema schema = DEFAULT_SCHEMA;
-
-final USERSDB_Schema OTHER_SCHEMA = createSchema("OTHER");
+final schema.USERSDB_Schema DEFAULT_SCHEMA = schema.createSchema("");
+final schema.USERSDB_Schema OTHER_SCHEMA = schema.createSchema("OTHER");
 
 main() {
   var select2 = sql.select(schema.USERS.ID)
@@ -32,20 +31,20 @@ main() {
 
   print(sql.prettify(sql.format(sql.select(schema.USERS.columns)
     ..from(schema.USERS)
-    ..where(schema.USERS.pkColumns.equalParameter))));
+    ..where(schema.USERS.columns.pks.equalParameter))));
 
-  schema.USERS.pkColumns.equalParameter;
+  schema.USERS.columns.pks.equalParameter;
 
   print(sql.prettify(sql.format(sql.insert(schema.USERS)
-    ..columns(schema.USERS.detailColumns)
-    ..values(sql.tuple(schema.USERS.detailColumns.parameter)))));
+    ..columns(schema.USERS.columns.details)
+    ..values(sql.tuple(schema.USERS.columns.details.parameter)))));
 
   print(sql.prettify(sql.format(sql.update(schema.USERS)
-    ..set(schema.USERS.detailColumns.equalParameter)
-    ..where(schema.USERS.pkColumns.equalParameter))));
+    ..set(schema.USERS.columns.details.equalParameter)
+    ..where(schema.USERS.columns.pks.equalParameter))));
 
-  print(sql.prettify(sql.format(
-      sql.delete(schema.USERS)..where(schema.USERS.pkColumns.equalParameter))));
+  print(sql.prettify(sql.format(sql.delete(schema.USERS)
+    ..where(schema.USERS.columns.pks.equalParameter))));
 
   print(sql.prettify(sql.format(sql.select(
       schema.USERS.columns.exclude(schema.USERS.ID, schema.USERS.GROUP_ID)))));

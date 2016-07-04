@@ -4,19 +4,18 @@ library users_schema;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
+final USERSDB_Schema _DEFAULT_SCHEMA = createSchema("");
 
-final USERSDB_Schema DEFAULT_SCHEMA = createSchema("");
+USERS_Table get USERS => _DEFAULT_SCHEMA.USERS;
 
 USERSDB_Schema createSchema(String name) =>
     registerSharedSchema(new _USERSDB_SchemaImpl(name));
-
 
 abstract class USERSDB_Schema implements SqlSchema {
 
   USERS_Table get USERS;
 
 }
-
 
 class _USERSDB_SchemaImpl extends SqlSchemaImpl implements USERSDB_Schema {
   _USERSDB_SchemaImpl(String name) : super(name);
@@ -40,13 +39,12 @@ class _USERSDB_SchemaImpl extends SqlSchemaImpl implements USERSDB_Schema {
   }
 
   @override
-  USERSDB_Schema clone({bool freeze}) => super.clone(freeze: freeze);
+  _USERSDB_SchemaImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   _USERSDB_SchemaImpl createClone(bool freeze) =>
       new _USERSDB_SchemaImpl.cloneFrom(this, freeze);
 }
-
 
 abstract class USERS_Table implements SqlTable {
 
@@ -81,7 +79,6 @@ abstract class USERS_Table implements SqlTable {
   USERS_Table alias(String alias);
 
 }
-
 
 class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
   static final Set<String> _pkNames = new Set.from(["ID"]);
@@ -147,7 +144,7 @@ class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
   USERS_Table alias(String alias) => super.alias(alias);
 
   @override
-  USERS_Table clone({bool freeze}) => super.clone(freeze: freeze);
+  _USERS_TableImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   _USERS_TableImpl createClone(bool freeze) =>

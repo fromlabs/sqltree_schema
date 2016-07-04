@@ -4,8 +4,7 @@
 import "package:sqltree/sqltree.dart" as sql;
 import "sqltree_schema.dart";
 
-registerSharedSchema(SqlSchema schema) =>
-    sql.registerNode(schema).clone(freeze: true).._share();
+registerSharedSchema(SqlSchema schema) => sql.registerNode(schema).share();
 
 abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
     implements SqlSchema, sql.ChildrenLockingSupport, sql.SqlNodeProvider {
@@ -26,9 +25,7 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
 
   bool get isShared => _isShared;
 
-  void _share() {
-    _isShared = true;
-  }
+  SqlSchema share() => clone(freeze: true).._isShared = true;
 
   SqlTableImpl createTable(String name);
 
@@ -40,9 +37,7 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
       table = nodeManager.registerNode(table);
 
       if (isShared) {
-        table = table.clone(freeze: true);
-
-        table._share();
+        table = table.share();
 
         _cachedTables[name] = table;
       }
@@ -60,7 +55,7 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
-  SqlSchema clone({bool freeze}) => super.clone(freeze: freeze);
+  SqlSchemaImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   String toString() => isDefault ? "DEFAULT_SCHEMA" : name;
@@ -101,9 +96,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
 
   bool get isShared => _isShared;
 
-  void _share() {
-    _isShared = true;
-  }
+  SqlTable share() => clone(freeze: true).._isShared = true;
 
   @override
   String get qualifiedName =>
@@ -122,9 +115,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
       table = nodeManager.registerNode(createTableAlias(alias));
 
       if (isShared) {
-        table = table.clone(freeze: true);
-
-        table._share();
+        table = table.share();
 
         _cachedTableAliases[alias] = table;
       }
@@ -145,9 +136,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
       column = nodeManager.registerNode(column);
 
       if (isShared) {
-        column = column.clone(freeze: true);
-
-        column._share();
+        column = column.share();
 
         _cachedColumns[name] = column;
       }
@@ -165,17 +154,6 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
   @override
   SqlColumnList get columns => new DelegatingSqlColumnList(columnNames
       .map((columnName) => column(columnName))
-      .toList(growable: false));
-
-  @override
-  SqlColumnList get pkColumns => new DelegatingSqlColumnList(primaryKeyNames
-      .map((primaryKeyName) => column(primaryKeyName))
-      .toList(growable: false));
-
-  @override
-  SqlColumnList get detailColumns => new DelegatingSqlColumnList(columnNames
-      .where((columnName) => !primaryKeyNames.contains(columnName))
-      .map((detailName) => column(detailName))
       .toList(growable: false));
 
   @override
@@ -201,7 +179,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
-  SqlTable clone({bool freeze}) => super.clone(freeze: freeze);
+  SqlTableImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   String toString() => name;
@@ -243,9 +221,7 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
 
   bool get isShared => _isShared;
 
-  void _share() {
-    _isShared = true;
-  }
+  SqlColumn share() => clone(freeze: true).._isShared = true;
 
   @override
   SqlColumn alias(String alias) {
@@ -255,9 +231,7 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
           new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table));
 
       if (isShared) {
-        column = column.clone(freeze: true);
-
-        column._share();
+        column = column.share();
 
         _cachedColumnAliases[alias] = column;
       }
@@ -310,7 +284,7 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
-  SqlColumn clone({bool freeze}) => super.clone(freeze: freeze);
+  SqlColumnImpl clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   String toString() => qualifiedName;
@@ -365,7 +339,7 @@ class DelegatingSqlColumnList extends sql.ExtensionSqlNodeListBase<SqlColumn>
       : super.cloneFrom(target, freeze);
 
   @override
-  SqlColumnList clone({bool freeze}) => super.clone(freeze: freeze);
+  DelegatingSqlColumnList clone({bool freeze}) => super.clone(freeze: freeze);
 
   @override
   DelegatingSqlColumnList createClone(bool freeze) =>
@@ -434,19 +408,28 @@ abstract class DelegatingSqlColumnIterableMixin
       new DelegatingSqlColumnList(base);
 
   @override
-  SqlColumnList get autoAlias => new DelegatingSqlColumnList(
-      map((column) => column.autoAlias).toList(growable: false));
+  SqlColumnIterable<SqlColumn> get pks =>
+      where((column) => column.isPrimaryKey);
 
   @override
-  sql.SqlNodeList get as =>
-      new sql.ExtensionSqlNodeList.from(map((column) => column.as));
+  SqlColumnIterable<SqlColumn> get details =>
+      where((column) => !column.isPrimaryKey);
 
   @override
-  sql.SqlNodeList get equalParameter =>
-      new sql.ExtensionSqlNodeList.from(map((column) => column.equalParameter));
+  SqlColumnIterable<SqlColumn> get autoAlias =>
+      new DelegatingSqlColumnIterable(map((column) => column.autoAlias));
 
   @override
-  SqlColumnList exclude(SqlColumn column0,
+  SqlColumnIterable<SqlColumn> postAlias(String postfix) =>
+      new DelegatingSqlColumnIterable(
+          map((column) => column.postAlias(postfix)));
+
+  @override
+  SqlColumnIterable<SqlColumn> preAlias(String prefix) =>
+      new DelegatingSqlColumnIterable(map((column) => column.preAlias(prefix)));
+
+  @override
+  SqlColumnIterable<SqlColumn> exclude(SqlColumn column0,
       [SqlColumn column1,
       SqlColumn column2,
       SqlColumn column3,
@@ -459,38 +442,32 @@ abstract class DelegatingSqlColumnIterableMixin
     var excludedNodes = sql.node(column0, column1, column2, column3, column4,
         column5, column6, column7, column8, column9);
 
-    var list = <SqlColumn>[];
-
-    for (var node in this) {
+    return new DelegatingSqlColumnIterable(where((column) {
       bool exclude = false;
       for (SqlColumn excludeNode in excludedNodes) {
-        if (node.name == excludeNode.name &&
-            node.table.name == excludeNode.table.name) {
+        if (column.name == excludeNode.name &&
+            column.table.name == excludeNode.table.name) {
           exclude = true;
           break;
         }
       }
-      if (!exclude) {
-        list.add(node);
-      }
-    }
-
-    return new DelegatingSqlColumnList(list);
+      return exclude;
+    }));
   }
 
   @override
-  sql.SqlNodeList get parameter =>
-      new sql.ExtensionSqlNodeList.from(map((column) => column.parameter));
+  sql.SqlNodeIterable<sql.SqlNode> get as =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.as));
 
   @override
-  SqlColumnList postAlias(String postfix) => new DelegatingSqlColumnList(
-      map((column) => column.postAlias(postfix)).toList(growable: false));
+  sql.SqlNodeIterable<sql.SqlNode> get equalParameter =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.equalParameter));
 
   @override
-  SqlColumnList preAlias(String prefix) => new DelegatingSqlColumnList(
-      map((column) => column.preAlias(prefix)).toList(growable: false));
+  sql.SqlNodeIterable<sql.SqlNode> get parameter =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.parameter));
 
   @override
-  sql.SqlNodeList get unqualified =>
-      new sql.ExtensionSqlNodeList.from(map((column) => column.unqualified));
+  sql.SqlNodeIterable<sql.SqlNode> get unqualified =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.unqualified));
 }
