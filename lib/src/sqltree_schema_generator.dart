@@ -33,9 +33,9 @@ class ColumnDescriptor {
 class FileSchemaGenerator extends SchemaGenerator {
   final String libraryPath;
 
-  FileSchemaGenerator(String libraryName, String schemaName, this.libraryPath,
-      {String copyrightText: ""})
-      : super(libraryName, schemaName, copyrightText: copyrightText);
+  FileSchemaGenerator(String schemaName, this.libraryPath,
+      {String copyrightText: "", String headerText: ""})
+      : super(schemaName, copyrightText: copyrightText, headerText: headerText);
 
   Future generateAndSave() async {
     return _save(await generate());
@@ -51,15 +51,16 @@ class FileSchemaGenerator extends SchemaGenerator {
 }
 
 class SchemaGenerator {
-  final String libraryName;
-
   final String schemaName;
 
   final String copyrightText;
 
+  final String headerText;
+
   final List<TableDescriptor> tables = [];
 
-  SchemaGenerator(this.libraryName, this.schemaName, {this.copyrightText: ""});
+  SchemaGenerator(this.schemaName,
+      {this.copyrightText: "", this.headerText: ""});
 
   Future<String> generate() async {
     StringBuffer buffer = new StringBuffer();
@@ -74,9 +75,7 @@ class SchemaGenerator {
   void createLibrary(StringBuffer buffer) {
     buffer.writeln("""$copyrightText
 
-library $libraryName;
-
-import 'package:sqltree_schema/sqltree_schema_builder.dart';
+$headerText
 """);
 
     createLibraryExtension(buffer);
@@ -85,10 +84,11 @@ import 'package:sqltree_schema/sqltree_schema_builder.dart';
   void createSchema(StringBuffer buffer) {
     var schemaClass = "${schemaName}_Schema";
     var schemaImpl = "_${schemaClass}Impl";
+    var defaultSchema = "_${schemaName}_DEFAULT";
 
     // FIELD
     buffer.writeln("""
-final $schemaClass _DEFAULT_SCHEMA = createSchema("");
+final $schemaClass $defaultSchema = create${schemaClass}("");
 """);
 
     for (var table in tables) {
@@ -96,12 +96,12 @@ final $schemaClass _DEFAULT_SCHEMA = createSchema("");
       var tableClass = "${tableName}_Table";
 
       buffer.writeln("""
-$tableClass get $tableName => _DEFAULT_SCHEMA.$tableName;
+$tableClass get $tableName => $defaultSchema.$tableName;
 """);
     }
 
     buffer.writeln("""
-$schemaClass createSchema(String name) =>
+$schemaClass create${schemaClass}(String name) =>
     registerSharedSchema(new $schemaImpl(name));
 """);
 

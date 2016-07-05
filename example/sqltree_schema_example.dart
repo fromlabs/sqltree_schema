@@ -7,8 +7,8 @@ import 'package:sqltree_schema/sqltree_schema.dart' as sql;
 
 import 'users_schema.g.dart' as schema;
 
-final schema.USERSDB_Schema DEFAULT_SCHEMA = schema.createSchema("");
-final schema.USERSDB_Schema OTHER_SCHEMA = schema.createSchema("OTHER");
+final schema.USERSDB_Schema DEFAULT_SCHEMA = schema.createUSERSDB_Schema("");
+final schema.USERSDB_Schema OTHER_SCHEMA = schema.createUSERSDB_Schema("OTHER");
 
 main() {
   var select2 = sql.select(schema.USERS.ID)

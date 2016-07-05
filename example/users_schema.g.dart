@@ -4,11 +4,12 @@ library users_schema;
 
 import 'package:sqltree_schema/sqltree_schema_builder.dart';
 
-final USERSDB_Schema _DEFAULT_SCHEMA = createSchema("");
 
-USERS_Table get USERS => _DEFAULT_SCHEMA.USERS;
+final USERSDB_Schema _USERSDB_DEFAULT = createUSERSDB_Schema("");
 
-USERSDB_Schema createSchema(String name) =>
+USERS_Table get USERS => _USERSDB_DEFAULT.USERS;
+
+USERSDB_Schema createUSERSDB_Schema(String name) =>
     registerSharedSchema(new _USERSDB_SchemaImpl(name));
 
 abstract class USERSDB_Schema implements SqlSchema {

@@ -4,8 +4,13 @@
 import 'package:sqltree_schema/sqltree_schema_generator.dart';
 
 main() async {
-  var generator = new FileSchemaGenerator(
-      "users_schema", "USERSDB", "example/users_schema.g.dart");
+  var generator =
+      new FileSchemaGenerator("USERSDB", "example/users_schema.g.dart",
+          headerText: """
+library users_schema;
+
+import 'package:sqltree_schema/sqltree_schema_builder.dart';
+""");
 
   generator.tables.add(new TableDescriptor("USERS")
     ..primaryKeys.addAll(["ID"])
