@@ -163,8 +163,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
       .toList(growable: false));
 
   @override
-  sql.SqlNode get as =>
-      this.isAliased ? sql.as(target, name) : sql.as(this, name);
+  sql.SqlNode get as => isAliased ? sql.as(target, name) : this;
 
   @override
   sql.SqlNode get unqualified => sql.node(name).single;
@@ -240,8 +239,7 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
   SqlColumn alias(String alias) {
     SqlColumnImpl column = _cachedColumnAliases[alias];
     if (column == null) {
-      column = nodeManager.registerNode(
-          new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table));
+      column = nodeManager.registerNode(createColumnAlias(alias));
 
       if (isShared) {
         column = column.share();
@@ -253,8 +251,7 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
   }
 
   @override
-  sql.SqlNode get as =>
-      isAliased ? sql.as(target, name) : sql.as(this, qualifiedName);
+  sql.SqlNode get as => isAliased ? sql.as(target, name) : this;
 
   @override
   SqlColumn get autoAlias => preAlias("${table.name}_");
@@ -286,6 +283,9 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
   @override
   SqlColumnImpl createClone(bool freeze) =>
       new SqlColumnImpl.cloneFrom(this, freeze);
+
+  SqlColumn createColumnAlias(String alias) =>
+      new SqlColumnImpl.aliased(alias, this, isPrimaryKey, table);
 
   @override
   createNode() {
