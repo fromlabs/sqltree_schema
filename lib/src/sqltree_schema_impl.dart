@@ -59,6 +59,12 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
 
   @override
   String toString() => isDefault ? "DEFAULT_SCHEMA" : name;
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  bool operator ==(other) => other is SqlSchema && name == other.name;
 }
 
 abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
@@ -183,6 +189,13 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
 
   @override
   String toString() => name;
+
+  @override
+  int get hashCode => qualifiedName.hashCode;
+
+  @override
+  bool operator ==(other) =>
+      other is SqlTableImpl && qualifiedName == other.qualifiedName;
 }
 
 class SqlColumnImpl extends sql.ExtensionSqlNodeBase
@@ -288,6 +301,13 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
 
   @override
   String toString() => qualifiedName;
+
+  @override
+  int get hashCode => qualifiedName.hashCode;
+
+  @override
+  bool operator ==(other) =>
+      other is SqlColumnImpl && qualifiedName == other.qualifiedName;
 }
 
 class DelegatingSqlColumnIterable
