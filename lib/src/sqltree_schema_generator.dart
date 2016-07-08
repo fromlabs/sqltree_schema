@@ -138,7 +138,7 @@ class $schemaImpl extends SqlSchemaImpl implements $schemaClass {
 
       buffer.writeln("""
   @override
-  $tableClass get $tableName => table("${table.name}");
+  $tableClass get $tableName => this["${table.name}"];
 """);
     }
 
@@ -199,6 +199,8 @@ abstract class $tableClass implements ${getBaseTableClass(table)} {
 
     buffer.writeln("""
   $tableClass alias(String alias);
+
+  $tableClass clone({bool freeze});
 """);
 
     createTableClassExtension(table, buffer);
@@ -225,7 +227,7 @@ class $tableImpl extends ${getBaseTableImpl(table)} implements $tableClass {
     for (var column in table.columns) {
       buffer.writeln("""
   @override
-  SqlColumn get ${column.name.toUpperCase()} => column("${column.name}");
+  SqlColumn get ${column.name.toUpperCase()} => this["${column.name}"];
 """);
     }
 

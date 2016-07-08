@@ -47,9 +47,9 @@ abstract class SqlSchema implements SqlNode {
 
   bool get isDefault;
 
-  SqlTable table(String name);
 
   SqlSchema clone({bool freeze});
+  SqlTable operator[](String tableName);
 }
 
 abstract class SqlTable implements SqlNode {
@@ -67,7 +67,7 @@ abstract class SqlTable implements SqlNode {
 
   SqlTable alias(String alias);
 
-  SqlColumn column(String name);
+  SqlColumn operator[](String columnName);
 
   SqlColumnList<SqlColumn> get columns;
 
@@ -114,16 +114,16 @@ abstract class SqlColumn implements SqlNode {
 
 abstract class SqlColumnIterable<T extends SqlColumn>
     implements SqlNodeIterable<T> {
-  SqlColumnIterable<T> exclude(T column0,
-      [T column1,
-      T column2,
-      T column3,
-      T column4,
-      T column5,
-      T column6,
-      T column7,
-      T column8,
-      T column9]);
+  SqlColumnIterable<T> exclude(column0,
+      [column1,
+      column2,
+      column3,
+      column4,
+      column5,
+      column6,
+      column7,
+      column8,
+      column9]);
 
   SqlColumnIterable<T> get pks;
 

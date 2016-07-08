@@ -25,7 +25,7 @@ class _USERSDB_SchemaImpl extends SqlSchemaImpl implements USERSDB_Schema {
       : super.cloneFrom(target, freeze);
 
   @override
-  USERS_Table get USERS => table("USERS");
+  USERS_Table get USERS => this["USERS"];
 
   @override
   SqlTableImpl createTable(String name) {
@@ -79,6 +79,8 @@ abstract class USERS_Table implements SqlTable {
 
   USERS_Table alias(String alias);
 
+  USERS_Table clone({bool freeze});
+
 }
 
 class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
@@ -94,46 +96,46 @@ class _USERS_TableImpl extends SqlTableImpl implements USERS_Table {
       : super.cloneFrom(target, freeze);
 
   @override
-  SqlColumn get ID => column("ID");
+  SqlColumn get ID => this["ID"];
 
   @override
-  SqlColumn get GROUP_ID => column("GROUP_ID");
+  SqlColumn get GROUP_ID => this["GROUP_ID"];
 
   @override
-  SqlColumn get AUTHOR_ID => column("AUTHOR_ID");
+  SqlColumn get AUTHOR_ID => this["AUTHOR_ID"];
 
   @override
-  SqlColumn get REVIEWER_ID => column("REVIEWER_ID");
+  SqlColumn get REVIEWER_ID => this["REVIEWER_ID"];
 
   @override
-  SqlColumn get PUBLISHER_ID => column("PUBLISHER_ID");
+  SqlColumn get PUBLISHER_ID => this["PUBLISHER_ID"];
 
   @override
-  SqlColumn get STATUS => column("STATUS");
+  SqlColumn get STATUS => this["STATUS"];
 
   @override
-  SqlColumn get MAIN_LOCALE => column("MAIN_LOCALE");
+  SqlColumn get MAIN_LOCALE => this["MAIN_LOCALE"];
 
   @override
-  SqlColumn get CATEGORY => column("CATEGORY");
+  SqlColumn get CATEGORY => this["CATEGORY"];
 
   @override
-  SqlColumn get TITLE => column("TITLE");
+  SqlColumn get TITLE => this["TITLE"];
 
   @override
-  SqlColumn get ABSTRACT => column("ABSTRACT");
+  SqlColumn get ABSTRACT => this["ABSTRACT"];
 
   @override
-  SqlColumn get ABSTRACT_IMAGE_URL => column("ABSTRACT_IMAGE_URL");
+  SqlColumn get ABSTRACT_IMAGE_URL => this["ABSTRACT_IMAGE_URL"];
 
   @override
-  SqlColumn get BODY => column("BODY");
+  SqlColumn get BODY => this["BODY"];
 
   @override
-  SqlColumn get PUBLISHING_DATE => column("PUBLISHING_DATE");
+  SqlColumn get PUBLISHING_DATE => this["PUBLISHING_DATE"];
 
   @override
-  SqlColumn get CREATION_TIMESTAMP => column("CREATION_TIMESTAMP");
+  SqlColumn get CREATION_TIMESTAMP => this["CREATION_TIMESTAMP"];
 
   @override
   Set<String> get primaryKeyNames => _pkNames;

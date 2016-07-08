@@ -29,17 +29,17 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
 
   SqlTableImpl createTable(String name);
 
-  SqlTable table(String name) {
-    SqlTableImpl table = _cachedTables[name];
+  SqlTable operator [](String tableName) {
+    SqlTableImpl table = _cachedTables[tableName];
     if (table == null) {
-      table = createTable(name);
+      table = createTable(tableName);
 
       table = nodeManager.registerNode(table);
 
       if (isShared) {
         table = table.share();
 
-        _cachedTables[name] = table;
+        _cachedTables[tableName] = table;
       }
     }
     return table;
@@ -129,22 +129,22 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
     return table;
   }
 
-  SqlColumn column(String name) {
-    SqlColumnImpl column = _cachedColumns[name];
+  SqlColumn operator [](String columnName) {
+    SqlColumnImpl column = _cachedColumns[columnName];
     if (column == null) {
-      bool isPrimaryKey = primaryKeyNames.contains(name);
+      bool isPrimaryKey = primaryKeyNames.contains(columnName);
       if (target != null) {
-        var targetColumn = target.column(name);
-        column = createColumnAliased(name, targetColumn, isPrimaryKey);
+        var targetColumn = target[columnName];
+        column = createColumnAliased(columnName, targetColumn, isPrimaryKey);
       } else {
-        column = createColumn(name, isPrimaryKey);
+        column = createColumn(columnName, isPrimaryKey);
       }
       column = nodeManager.registerNode(column);
 
       if (isShared) {
         column = column.share();
 
-        _cachedColumns[name] = column;
+        _cachedColumns[columnName] = column;
       }
     }
     return column;
@@ -159,7 +159,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
 
   @override
   SqlColumnList get columns => new DelegatingSqlColumnList(columnNames
-      .map((columnName) => column(columnName))
+      .map((columnName) => this[columnName])
       .toList(growable: false));
 
   @override
@@ -449,29 +449,38 @@ abstract class DelegatingSqlColumnIterableMixin
       new DelegatingSqlColumnIterable(map((column) => column.preAlias(prefix)));
 
   @override
-  SqlColumnIterable<SqlColumn> exclude(SqlColumn column0,
-      [SqlColumn column1,
-      SqlColumn column2,
-      SqlColumn column3,
-      SqlColumn column4,
-      SqlColumn column5,
-      SqlColumn column6,
-      SqlColumn column7,
-      SqlColumn column8,
-      SqlColumn column9]) {
-    var excludedNodes = sql.node(column0, column1, column2, column3, column4,
-        column5, column6, column7, column8, column9);
+  SqlColumnIterable<SqlColumn> exclude(column0,
+      [column1,
+      column2,
+      column3,
+      column4,
+      column5,
+      column6,
+      column7,
+      column8,
+      column9]) {
+    var excludedNodes = sql
+        .node(column0, column1, column2, column3, column4, column5, column6,
+            column7, column8, column9)
+        .toList(growable: false);
 
     return new DelegatingSqlColumnIterable(where((column) {
       bool exclude = false;
-      for (SqlColumn excludeNode in excludedNodes) {
-        if (column.name == excludeNode.name &&
-            column.table.name == excludeNode.table.name) {
-          exclude = true;
+      for (sql.SqlNode excludeNode in excludedNodes) {
+        if (excludeNode is SqlColumn) {
+          exclude = column.name == excludeNode.name &&
+              column.table.name == excludeNode.table.name;
+        } else if (excludeNode.isRawNode) {
+          exclude = column.qualifiedName == excludeNode.rawExpression;
+        } else {
+          throw new UnsupportedError("Exclude column not valid $excludeNode");
+        }
+
+        if (exclude) {
           break;
         }
       }
-      return exclude;
+      return !exclude;
     }));
   }
 
