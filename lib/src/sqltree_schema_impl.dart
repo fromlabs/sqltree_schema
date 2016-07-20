@@ -158,7 +158,7 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
       new SqlColumnImpl.aliased(name, targetColumn, isPrimaryKey, this);
 
   @override
-  SqlColumnList get columns => new DelegatingSqlColumnList(columnNames
+  SqlColumnList<SqlColumn> get columns => new DelegatingSqlColumnList(columnNames
       .map((columnName) => this[columnName])
       .toList(growable: false));
 
@@ -310,146 +310,48 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
       other is SqlColumnImpl && qualifiedName == other.qualifiedName;
 }
 
-class DelegatingSqlColumnIterable
-    extends sql.ExtensionSqlNodeIterableBase<SqlColumn>
-    with DelegatingSqlColumnIterableMixin
-    implements SqlColumnIterable {
-  DelegatingSqlColumnIterable(Iterable<SqlColumn> base) : super(base);
-
-  /* FROM SQLNODEITERABLE */
-
-  SqlColumnIterable<SqlColumn> whereReference(String reference) =>
-      super.whereReference(reference);
-
-  SqlColumnIterable<SqlColumn> whereDeep(bool test(SqlColumn element)) =>
-      super.whereDeep(test);
-
-  SqlColumnIterable<SqlColumn> expandNodes(
-          Iterable<SqlColumn> f(SqlColumn element)) =>
-      super.expandNodes(f);
-
-  SqlColumnIterable<SqlColumn> mapNodes(SqlColumn f(SqlColumn element)) =>
-      super.mapNodes(f);
-
-  /* FROM ITERABLE */
-
-  SqlColumnIterable<SqlColumn> skip(int n) => super.skip(n);
-
-  SqlColumnIterable<SqlColumn> skipWhile(bool test(SqlColumn value)) =>
-      super.skipWhile(test);
-
-  SqlColumnIterable<SqlColumn> take(int n) => super.take(n);
-
-  SqlColumnIterable<SqlColumn> takeWhile(bool test(SqlColumn value)) =>
-      super.takeWhile(test);
-
-  SqlColumnList<SqlColumn> toList({bool growable: true}) =>
-      super.toList(growable: growable);
-
-  SqlColumnIterable<SqlColumn> where(bool test(SqlColumn element)) =>
-      super.where(test);
-}
-
-class DelegatingSqlColumnList extends sql.ExtensionSqlNodeListBase<SqlColumn>
-    with DelegatingSqlColumnIterableMixin
-    implements SqlColumnList {
-  DelegatingSqlColumnList(List<SqlColumn> base) : super(base);
-
-  DelegatingSqlColumnList.cloneFrom(DelegatingSqlColumnList target, bool freeze)
-      : super.cloneFrom(target, freeze);
+class DelegatingSqlColumnIterable<T extends SqlColumn> extends sql
+    .ExtensionSqlNodeIterableBase<T> implements SqlColumnIterable<T> {
+  DelegatingSqlColumnIterable(Iterable<T> base) : super(base);
 
   @override
-  DelegatingSqlColumnList clone({bool freeze}) => super.clone(freeze: freeze);
-
-  @override
-  DelegatingSqlColumnList createClone(bool freeze) =>
-      new DelegatingSqlColumnList.cloneFrom(this, freeze);
-
-  /* FROM LIST */
-
-  SqlColumnIterable<SqlColumn> getRange(int start, int end) =>
-      super.getRange(start, end);
-
-  SqlColumnIterable<SqlColumn> get reversed => super.reversed;
-
-  SqlColumnList<SqlColumn> sublist(int start, [int end]) =>
-      super.sublist(start, end);
-
-  /* FROM SQLNODEITERABLE */
-
-  SqlColumnIterable<SqlColumn> whereReference(String reference) =>
-      super.whereReference(reference);
-
-  SqlColumnIterable<SqlColumn> whereDeep(bool test(SqlColumn element)) =>
-      super.whereDeep(test);
-
-  SqlColumnIterable<SqlColumn> expandNodes(
-          Iterable<SqlColumn> f(SqlColumn element)) =>
-      super.expandNodes(f);
-
-  SqlColumnIterable<SqlColumn> mapNodes(SqlColumn f(SqlColumn element)) =>
-      super.mapNodes(f);
-
-  /* FROM ITERABLE */
-
-  SqlColumnIterable<SqlColumn> skip(int n) => super.skip(n);
-
-  SqlColumnIterable<SqlColumn> skipWhile(bool test(SqlColumn value)) =>
-      super.skipWhile(test);
-
-  SqlColumnIterable<SqlColumn> take(int n) => super.take(n);
-
-  SqlColumnIterable<SqlColumn> takeWhile(bool test(SqlColumn value)) =>
-      super.takeWhile(test);
-
-  SqlColumnList<SqlColumn> toList({bool growable: true}) =>
-      super.toList(growable: growable);
-
-  SqlColumnIterable<SqlColumn> where(bool test(SqlColumn element)) =>
-      super.where(test);
-}
-
-abstract class DelegatingSqlColumnIterableMixin
-    implements SqlColumnIterable, sql.ExtensionSqlNodeIterableBase<SqlColumn> {
-  @override
-  bool isAlreadyWrappedIterable(Iterable<SqlColumn> base) =>
+  bool isAlreadyWrappedIterable(Iterable<T> base) =>
       base is DelegatingSqlColumnIterable;
 
   @override
-  bool isAlreadyWrappedList(Iterable<SqlColumn> base) =>
+  bool isAlreadyWrappedList(Iterable<T> base) =>
       base is DelegatingSqlColumnList;
 
   @override
-  SqlColumnIterable createIterable(Iterable<SqlColumn> base) =>
-      new DelegatingSqlColumnIterable(base);
+  SqlColumnIterable<T> createIterable(Iterable<T> base) =>
+      new DelegatingSqlColumnIterable<T>(base);
 
   @override
-  SqlColumnList createList(List<SqlColumn> base) =>
-      new DelegatingSqlColumnList(base);
+  SqlColumnList<T> createList(List<T> base) =>
+      new DelegatingSqlColumnList<T>(base);
 
   @override
-  SqlColumnIterable<SqlColumn> get pks =>
-      where((column) => column.isPrimaryKey);
+  SqlColumnIterable<T> get pks => where((column) => column.isPrimaryKey);
 
   @override
-  SqlColumnIterable<SqlColumn> get details =>
-      where((column) => !column.isPrimaryKey);
+  SqlColumnIterable<T> get details => where((column) => !column.isPrimaryKey);
 
   @override
-  SqlColumnIterable<SqlColumn> get autoAlias =>
-      new DelegatingSqlColumnIterable(map((column) => column.autoAlias));
+  SqlColumnIterable<T> get autoAlias => new DelegatingSqlColumnIterable<T>(
+      map((column) => column.autoAlias) as Iterable<T>);
 
   @override
-  SqlColumnIterable<SqlColumn> postAlias(String postfix) =>
-      new DelegatingSqlColumnIterable(
-          map((column) => column.postAlias(postfix)));
+  SqlColumnIterable<T> postAlias(String postfix) =>
+      new DelegatingSqlColumnIterable<T>(
+          map((column) => column.postAlias(postfix)) as Iterable<T>);
 
   @override
-  SqlColumnIterable<SqlColumn> preAlias(String prefix) =>
-      new DelegatingSqlColumnIterable(map((column) => column.preAlias(prefix)));
+  SqlColumnIterable<T> preAlias(String prefix) =>
+      new DelegatingSqlColumnIterable<T>(
+          map((column) => column.preAlias(prefix)) as Iterable<T>);
 
   @override
-  SqlColumnIterable<SqlColumn> exclude(column0,
+  SqlColumnIterable<T> exclude(column0,
       [column1,
       column2,
       column3,
@@ -464,7 +366,7 @@ abstract class DelegatingSqlColumnIterableMixin
             column7, column8, column9)
         .toList(growable: false);
 
-    return new DelegatingSqlColumnIterable(where((column) {
+    return new DelegatingSqlColumnIterable<T>(where((column) {
       bool exclude = false;
       for (sql.SqlNode excludeNode in excludedNodes) {
         if (excludeNode is SqlColumn) {
@@ -499,4 +401,172 @@ abstract class DelegatingSqlColumnIterableMixin
   @override
   sql.SqlNodeIterable<sql.SqlNode> get unqualified =>
       new sql.ExtensionSqlNodeIterable(map((column) => column.unqualified));
+
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable<T> whereReference(String reference) =>
+      super.whereReference(reference);
+
+  SqlColumnIterable<T> whereDeep(bool test(T element)) => super.whereDeep(test);
+
+  SqlColumnIterable<T> expandNodes(Iterable<T> f(T element)) =>
+      super.expandNodes(f);
+
+  SqlColumnIterable<T> mapNodes(T f(T element)) => super.mapNodes(f);
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable<T> skip(int n) => super.skip(n);
+
+  SqlColumnIterable<T> skipWhile(bool test(T value)) => super.skipWhile(test);
+
+  SqlColumnIterable<T> take(int n) => super.take(n);
+
+  SqlColumnIterable<T> takeWhile(bool test(T value)) => super.takeWhile(test);
+
+  SqlColumnList<T> toList({bool growable: true}) =>
+      super.toList(growable: growable);
+
+  SqlColumnIterable<T> where(bool test(T element)) => super.where(test);
+}
+
+class DelegatingSqlColumnList<T extends SqlColumn>
+    extends sql.ExtensionSqlNodeListBase<T> implements SqlColumnList<T> {
+  DelegatingSqlColumnList(List<T> base) : super(base);
+
+  DelegatingSqlColumnList.cloneFrom(
+      DelegatingSqlColumnList<T> target, bool freeze)
+      : super.cloneFrom(target, freeze);
+
+  @override
+  bool isAlreadyWrappedIterable(Iterable<T> base) =>
+      base is DelegatingSqlColumnIterable;
+
+  @override
+  bool isAlreadyWrappedList(Iterable<T> base) =>
+      base is DelegatingSqlColumnList;
+
+  @override
+  SqlColumnIterable<T> createIterable(Iterable<T> base) =>
+      new DelegatingSqlColumnIterable<T>(base);
+
+  @override
+  SqlColumnList<T> createList(List<T> base) =>
+      new DelegatingSqlColumnList<T>(base);
+
+  @override
+  SqlColumnIterable<T> get pks => where((column) => column.isPrimaryKey);
+
+  @override
+  SqlColumnIterable<T> get details => where((column) => !column.isPrimaryKey);
+
+  @override
+  SqlColumnIterable<T> get autoAlias => new DelegatingSqlColumnIterable<T>(
+      map((column) => column.autoAlias) as Iterable<T>);
+
+  @override
+  SqlColumnIterable<T> postAlias(String postfix) =>
+      new DelegatingSqlColumnIterable<T>(
+          map((column) => column.postAlias(postfix)) as Iterable<T>);
+
+  @override
+  SqlColumnIterable<T> preAlias(String prefix) =>
+      new DelegatingSqlColumnIterable<T>(
+          map((column) => column.preAlias(prefix)) as Iterable<T>);
+
+  @override
+  SqlColumnIterable<T> exclude(column0,
+      [column1,
+      column2,
+      column3,
+      column4,
+      column5,
+      column6,
+      column7,
+      column8,
+      column9]) {
+    var excludedNodes = sql
+        .node(column0, column1, column2, column3, column4, column5, column6,
+            column7, column8, column9)
+        .toList(growable: false);
+
+    return new DelegatingSqlColumnIterable<T>(where((column) {
+      bool exclude = false;
+      for (sql.SqlNode excludeNode in excludedNodes) {
+        if (excludeNode is SqlColumn) {
+          exclude = column.name == excludeNode.name &&
+              column.table.name == excludeNode.table.name;
+        } else if (excludeNode.isRawNode) {
+          exclude = column.qualifiedName == excludeNode.rawExpression;
+        } else {
+          throw new UnsupportedError("Exclude column not valid $excludeNode");
+        }
+
+        if (exclude) {
+          break;
+        }
+      }
+      return !exclude;
+    }));
+  }
+
+  @override
+  sql.SqlNodeIterable<sql.SqlNode> get as =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.as));
+
+  @override
+  sql.SqlNodeIterable<sql.SqlNode> get equalParameter =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.equalParameter));
+
+  @override
+  sql.SqlNodeIterable<sql.SqlNode> get parameter =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.parameter));
+
+  @override
+  sql.SqlNodeIterable<sql.SqlNode> get unqualified =>
+      new sql.ExtensionSqlNodeIterable(map((column) => column.unqualified));
+
+  @override
+  DelegatingSqlColumnList<T> clone({bool freeze}) =>
+      super.clone(freeze: freeze);
+
+  @override
+  DelegatingSqlColumnList<T> createClone(bool freeze) =>
+      new DelegatingSqlColumnList<T>.cloneFrom(this, freeze);
+
+  /* FROM LIST */
+
+  SqlColumnIterable<T> getRange(int start, int end) =>
+      super.getRange(start, end);
+
+  SqlColumnIterable<T> get reversed => super.reversed;
+
+  SqlColumnList<T> sublist(int start, [int end]) => super.sublist(start, end);
+
+  /* FROM SQLNODEITERABLE */
+
+  SqlColumnIterable<T> whereReference(String reference) =>
+      super.whereReference(reference);
+
+  SqlColumnIterable<T> whereDeep(bool test(T element)) => super.whereDeep(test);
+
+  SqlColumnIterable<T> expandNodes(Iterable<T> f(T element)) =>
+      super.expandNodes(f);
+
+  SqlColumnIterable<T> mapNodes(T f(T element)) => super.mapNodes(f);
+
+  /* FROM ITERABLE */
+
+  SqlColumnIterable<T> skip(int n) => super.skip(n);
+
+  SqlColumnIterable<T> skipWhile(bool test(T value)) => super.skipWhile(test);
+
+  SqlColumnIterable<T> take(int n) => super.take(n);
+
+  SqlColumnIterable<T> takeWhile(bool test(T value)) => super.takeWhile(test);
+
+  SqlColumnList<T> toList({bool growable: true}) =>
+      super.toList(growable: growable);
+
+  SqlColumnIterable<T> where(bool test(T element)) => super.where(test);
 }
