@@ -71,6 +71,8 @@ main() {
 
   print(sql.prettify(sql.format(select)));
 
+  print(schema.USERS.ID.isFreezed);
+
   select = sql.select(
       schema.USERS.ID,
       schema.USERS.ID.alias("MY_ID"),
