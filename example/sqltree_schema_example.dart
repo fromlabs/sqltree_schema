@@ -125,4 +125,17 @@ main() {
   print(sql.format(OTHER_SCHEMA.USERS.as));
   print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS")));
   print(sql.format(OTHER_SCHEMA.USERS.alias("MY_USERS").as));
+  print("******************************");
+  print(sql.format(sql.select(schema.USERS.columns)));
+  print(sql.format(sql.select(schema.USERS.columns.unqualified)));
+  print(sql.format(sql.select(
+      sql.column(schema.USERS.ID, schema.USERS.ABSTRACT, schema.USERS.BODY))));
+  print(sql.format(sql.select(sql
+      .column(schema.USERS.ID, schema.USERS.ABSTRACT, schema.USERS.BODY)
+      .unqualified)));
+  print("******************************");
+  print(sql.prettify(sql.format(sql.insert(schema.USERS)
+    ..set(sql
+        .column(schema.USERS.ID, schema.USERS.ABSTRACT, schema.USERS.BODY)
+        .equalParameter))));
 }

@@ -5,7 +5,7 @@ import "package:sqltree/sqltree.dart";
 
 import "sqltree_schema_impl.dart";
 
-final ExtTypes types = new ExtTypes();
+final ExtTypes schemaTypes = new ExtTypes();
 
 class ExtTypes {
   final String SCHEMA = "SCHEMA";
@@ -13,15 +13,17 @@ class ExtTypes {
   final String COLUMN = "COLUMN";
 
   ExtTypes() {
+    types; // serve ad inizializzare prima i formattatori di default
+
     _registerTypes(this);
 
     _initialize(this);
   }
 
-  void _registerTypes(ExtTypes types) {
-    registerNodeType(types.SCHEMA, (node) => node is SqlSchemaImpl);
-    registerNodeType(types.TABLE, (node) => node is SqlTableImpl);
-    registerNodeType(types.COLUMN, (node) => node is SqlColumnImpl);
+  void _registerTypes(ExtTypes schemaTypes) {
+    registerNodeType(schemaTypes.SCHEMA, (node) => node is SqlSchemaImpl);
+    registerNodeType(schemaTypes.TABLE, (node) => node is SqlTableImpl);
+    registerNodeType(schemaTypes.COLUMN, (node) => node is SqlColumnImpl);
   }
 }
 
@@ -29,7 +31,7 @@ void _initialize(ExtTypes types) {
   _registerFormatters(types);
 }
 
-void _registerFormatters(ExtTypes types) {
+void _registerFormatters(ExtTypes schemaTypes) {
   registerNodeFormatter((node, formattedChildren) {
     if (node is SqlColumn) {
       return node.qualifiedName;
@@ -37,19 +39,51 @@ void _registerFormatters(ExtTypes types) {
       return node.qualifiedName;
     } else if (node is SqlSchema) {
       return node.name;
+    } else if (types.COLUMNS_CLAUSE == node.type) {
+      return formatByRule(
+          // TODO deve essere possibile bloccare la formattazione di default dei children
+          node.children
+              .map((node) => node is SqlColumn ? node.unqualified : node)
+              .map((node) => format(node))
+              .where((formatted) => formatted?.isNotEmpty ?? false),
+          prefix: "(",
+          separator: ", ",
+          postfix: ")");
     }
     return null;
   });
 }
+
+SqlColumnIterable<SqlColumn> column(SqlColumn column0,
+        [SqlColumn column1,
+        SqlColumn column2,
+        SqlColumn column3,
+        SqlColumn column4,
+        SqlColumn column5,
+        SqlColumn column6,
+        SqlColumn column7,
+        SqlColumn column8,
+        SqlColumn column9]) =>
+    new DelegatingSqlColumnIterable([
+      column0,
+      column1,
+      column2,
+      column3,
+      column4,
+      column5,
+      column6,
+      column7,
+      column8,
+      column9
+    ].where((column) => column != null));
 
 abstract class SqlSchema implements SqlNode {
   String get name;
 
   bool get isDefault;
 
-
   SqlSchema clone({bool freeze});
-  SqlTable operator[](String tableName);
+  SqlTable operator [](String tableName);
 }
 
 abstract class SqlTable implements SqlNode {
@@ -67,7 +101,7 @@ abstract class SqlTable implements SqlNode {
 
   SqlTable alias(String alias);
 
-  SqlColumn operator[](String columnName);
+  SqlColumn operator [](String columnName);
 
   SqlColumnList<SqlColumn> get columns;
 

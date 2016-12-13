@@ -14,7 +14,7 @@ abstract class SqlSchemaImpl extends sql.ExtensionSqlNodeBase
 
   bool _isShared = false;
 
-  SqlSchemaImpl(this.name) : super(types.SCHEMA, maxChildrenLength: 0);
+  SqlSchemaImpl(this.name) : super(schemaTypes.SCHEMA, maxChildrenLength: 0);
 
   SqlSchemaImpl.cloneFrom(SqlSchemaImpl target, bool freeze)
       : this.name = target.name,
@@ -83,12 +83,12 @@ abstract class SqlTableImpl extends sql.ExtensionSqlNodeBase
 
   SqlTableImpl(this.name, this.schema)
       : this.target = null,
-        super(types.TABLE, maxChildrenLength: 0);
+        super(schemaTypes.TABLE, maxChildrenLength: 0);
 
   SqlTableImpl.aliased(this.name, SqlTableImpl target)
       : this.schema = target.schema,
         this.target = target,
-        super(types.TABLE, maxChildrenLength: 0) {
+        super(schemaTypes.TABLE, maxChildrenLength: 0) {
     if (this.target.isAliased) {
       throw new StateError("Table already aliased: $name");
     }
@@ -213,12 +213,12 @@ class SqlColumnImpl extends sql.ExtensionSqlNodeBase
 
   SqlColumnImpl(this.name, this.isPrimaryKey, this.table)
       : this.target = null,
-        super(types.COLUMN, maxChildrenLength: 0);
+        super(schemaTypes.COLUMN, maxChildrenLength: 0);
 
   SqlColumnImpl.aliased(
       this.name, SqlColumn target, this.isPrimaryKey, this.table)
       : this.target = target,
-        super(types.COLUMN, maxChildrenLength: 0) {
+        super(schemaTypes.COLUMN, maxChildrenLength: 0) {
     if (this.target.isAliased) {
       throw new StateError("Column already aliased: $name");
     }
