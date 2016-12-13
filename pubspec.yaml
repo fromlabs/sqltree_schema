@@ -1,11 +1,11 @@
 name: sqltree_schema
 description: Schema support for the sqltree library.
-version: 0.4.1
+version: 0.4.1+1
 author: Roberto Tassi <roberto.tassi@fromlabs.org>
 homepage: https://github.com/fromlabs/sqltree_schema
 environment:
   sdk: ">=1.8.0 <2.0.0"
 dependencies:
-  sqltree: "^0.4.0"
+  sqltree: "^0.6.0"
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'
